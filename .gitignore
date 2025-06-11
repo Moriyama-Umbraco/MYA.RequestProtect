@@ -493,3 +493,6 @@ $RECYCLE.BIN/
 **/uSync/v9/Media/
 **/uSync/v9/Content/
 .vscode/
+
+# Verify files
+*.received.*

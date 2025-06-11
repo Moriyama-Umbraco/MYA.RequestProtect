@@ -1,130 +1,136 @@
 ﻿using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
+using Moriyama.PreviewAuth.Logging;
 using Moriyama.PreviewAuth.Options;
+using Moriyama.PreviewAuth.Setup;
 using System.Text.RegularExpressions;
 
 namespace Moriyama.PreviewAuth;
 
-public class PreviewAuthMiddleware
+public sealed class PreviewAuthMiddleware
 {
-	private readonly PreviewAuthOptions config;
-	private readonly RequestDelegate _next;
-	private readonly ILogger logger;
+    private readonly PreviewAuthOptions config;
+    private readonly RequestDelegate _next;
+    private readonly ILogger logger;
+    private readonly IDatetimeProvider dateTimeProvider;
 
-	private const string PreviewAuthCookieName = "MYAPA";
+    private const string PreviewAuthCookieName = "MYAPA";
 
-	public PreviewAuthMiddleware(RequestDelegate next, ILogger<PreviewAuthMiddleware> logger, IOptionsMonitor<PreviewAuthOptions> config)
-	{
-		this.config = config.CurrentValue;
-		_next = next;
-		this.logger = logger;
-	}
+    public PreviewAuthMiddleware(RequestDelegate next, 
+        ILogger<PreviewAuthMiddleware> logger, 
+        IOptionsMonitor<PreviewAuthOptions> config,
+        IDatetimeProvider dateTimeProvider)
+    {
+        this.config = config.CurrentValue;
+        _next = next;
+        this.logger = logger;
+        this.dateTimeProvider = dateTimeProvider;
+    }
 
-	public async Task InvokeAsync(HttpContext context)
-	{
-		logger.LogDebug("Preview Auth Middleware invoked");
-		// Log request information
-		if(config.Enabled && !HasMiddlewareAuthCookie(context.Request))
-		{
-			logger.LogDebug("Preview Auth Middleware: Auth Cookie not found");
+    public async Task InvokeAsync(HttpContext context)
+    {
+        if (!config.Enabled || HasMiddlewareAuthCookie(context.Request))
+        {
+            await _next(context);
+            return;
+        }
 
-			if (RequestIsAuthorised(context, out var setCookie))
-			{
-				if (setCookie is not null and true)
-				{
-					context.Response.Cookies.Append(PreviewAuthCookieName, DateTime.Now.Ticks.ToString(),
-						new CookieOptions
-						{
-							Expires = DateTimeOffset.Now.AddMinutes(30),
-							HttpOnly = true,
-							SameSite = SameSiteMode.Strict,
-							IsEssential = true,
-							Secure = true
-						});
-				}
-			}
-			else
-			{
-				context.Response.StatusCode = 400;
-				await context.Response.WriteAsync("Bad Request: Unknown path");
-				return;
-			}
-				
-		}
+        logger.LogAuthCookieNotFound();
 
-		// Call the next middleware in the pipeline
-		await _next(context);
+        if (RequestIsAuthorised(context, out var setCookie))
+        {
+            if (setCookie is true)
+            {
+                context.Response.Cookies.Append(PreviewAuthCookieName, dateTimeProvider.Now.Ticks.ToString(),
+                    new CookieOptions
+                    {
+                        Expires = dateTimeProvider.NowOffSet.AddMinutes(30),
+                        HttpOnly = true,
+                        SameSite = SameSiteMode.Strict,
+                        IsEssential = true,
+                        Secure = true
+                    });
+            }
+        }
+        else
+        {
+            context.Response.StatusCode = 400;
+            await context.Response.WriteAsync("Bad Request: Unknown path");
+            return;
+        }
 
-		// Log response information
-		Console.WriteLine($"Response: {context.Response.StatusCode}");
-	}
+        await _next(context);
+    }
 
-	private bool RequestIsAuthorised(HttpContext context, out bool? setCookie)
-	{
-		
-		try
-		{
-			if(AuthNotNeeded(context))
-			{
-				setCookie = false;
-				return true;
-			}
+    private bool RequestIsAuthorised(HttpContext context, out bool setCookie)
+    {
+        setCookie = false;
+        try
+        {
+            if (AuthNotNeeded(context))
+            {
+                return true;
+            }
 
-			if (ValidateCode(context.Request.Query))
-			{
-				setCookie = true;
-				return true;
-			}
-		}
-		catch (Exception ex)
-		{
-			logger.LogError(ex, "Unable to check authorisation of request");
-		}
-		setCookie = false;
-		return false;
-	}
+            if (ValidateCode(context.Request.Query))
+            {
+                setCookie = true;
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Unable to check authorisation of request");
+        }
 
-	private bool ValidateCode(IQueryCollection query)
-	{
-		var queryCode = query[config.QueryKey];
+        return false;
+    }
 
-		return queryCode.Equals(config.Code);
-	}
+    private bool ValidateCode(IQueryCollection query)
+    {
+        var queryCode = query[config.QueryKey];
+        return queryCode.Equals(config.Code);
+    }
 
-	private bool AuthNotNeeded(HttpContext context)
-	{
-		if (config.Rules.IpWhitelist != null && config.Rules.IpWhitelist.Any(ip => ip.Equals(context.Connection.RemoteIpAddress))) return true;
+    private bool AuthNotNeeded(HttpContext context)
+    {
+        if (config.Rules.IpWhitelist != null && config.Rules.IpWhitelist.Any(ip => ip.Equals(context.Connection.RemoteIpAddress?.ToString())))
+        {
+            return true;
+        }
 
-		if(config.Rules.Rules != null )
-		{
-			var rulesResults = config.Rules.Rules.Length > 0 && config.Rules.Rules.Where(r => r.Enabled).All(r => DoesRulePass(r, context.Request));
-			if (rulesResults) return true;
-		}
+        if (config.Rules.Rules?.Length > 0)
+        {
+            var rulesResults = config.Rules.Rules.Any(r => r.Enabled && DoesRulePass(r, context.Request));
+            return !rulesResults; //If any rules pass the we need to verify the code
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	private bool DoesRulePass(AuthRule r, HttpRequest request)
-	{
-		logger.LogDebug("Rule Validation: {rule} - {request}", r.ToString(), request.GetDisplayUrl());
+    private bool DoesRulePass(AuthRule r, HttpRequest request)
+    {
+        var url = request.GetDisplayUrl();
+        var ruleResult = r.AppliesTo switch
+        {
+            AppliesTo.Host => Regex.IsMatch(request.Host.ToString(), r.Pattern),
+            AppliesTo.Query => Regex.IsMatch(request.QueryString.ToString(), r.Pattern),
+            AppliesTo.Path => Regex.IsMatch(request.Path, r.Pattern),
+            _ => Regex.IsMatch(request.Path, r.Pattern)
+        };
 
-		return r.AppliesTo switch
-		{
-			AppliesTo.Host => Regex.IsMatch(request.Host.ToString(), r.Pattern),
-			AppliesTo.Query => Regex.IsMatch(request.QueryString.ToString(), r.Pattern),
-			AppliesTo.Path => Regex.IsMatch(request.Path, r.Pattern),
-			_ => Regex.IsMatch(request.Path, r.Pattern)
-		};
-		
-	}
+        if (ruleResult)
+        {
+            logger.LogRuleValidation(r, url);
+        }
+        else
+        {
+            logger.LogRuleValidationFailed(r, url);
+        }
 
-	private bool HasMiddlewareAuthCookie(HttpRequest request)
-	{
-		if (!request.Cookies.ContainsKey(PreviewAuthCookieName)) return false;
+        return ruleResult;
+    }
 
-		var cookieVal = request.Cookies[PreviewAuthCookieName];
-
-		return !string.IsNullOrWhiteSpace(cookieVal);
-		
-	}
+    private static bool HasMiddlewareAuthCookie(HttpRequest request) 
+        => request.Cookies.TryGetValue(PreviewAuthCookieName, out var cookieVal) && !string.IsNullOrWhiteSpace(cookieVal);
 }
