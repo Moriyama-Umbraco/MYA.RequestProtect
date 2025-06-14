@@ -1,5 +1,9 @@
 # Moriyama.RequestProtect
 
+[![Downloads](https://img.shields.io/nuget/dt/Moriyama.RequestProtect?color=cc9900)](https://www.nuget.org/packages/Moriyama.RequestProtect/)
+[![NuGet](https://img.shields.io/nuget/vpre/Moriyama.RequestProtect?color=0273B3)](https://www.nuget.org/packages/Moriyama.RequestProtect)
+[![GitHub license](https://img.shields.io/github/license/Moriyama-Umbraco/MYA.RequestProtect?color=8AB803)](LICENSE)
+
 A flexible and powerful ASP.NET Core middleware for protecting web requests through IP whitelisting, URL pattern matching, and query string authentication.
 
 ## Features
@@ -11,6 +15,8 @@ A flexible and powerful ASP.NET Core middleware for protecting web requests thro
 - 🍪 Automatic cookie-based authentication after successful validation
 - ⚙️ Highly configurable through appsettings.json
 - 📝 Comprehensive logging support
+
+<img src="../docs/logo.svg" alt="Moriyama.RequestProtect Logo" width="128" height="128">
 
 ## Installation
 
