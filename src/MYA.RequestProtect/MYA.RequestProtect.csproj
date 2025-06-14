@@ -6,6 +6,8 @@
 		<Nullable>enable</Nullable>
 		<RootNamespace>MYA.RequestProtect</RootNamespace>
 		<AssemblyName>MYA.RequestProtect</AssemblyName>
+      <OutputType>Library</OutputType>
+      <IsPackable>true</IsPackable>
 	</PropertyGroup>
 
 	<PropertyGroup>
