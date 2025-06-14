@@ -25,4 +25,10 @@ public static class BuilderExtensions
 
         return services;
     }
+
+    public static IApplicationBuilder UseRequestProtect(
+        this IApplicationBuilder builder)
+    {
+        return builder.UseMiddleware<RequestProtectMiddleware>();
+    }
 }

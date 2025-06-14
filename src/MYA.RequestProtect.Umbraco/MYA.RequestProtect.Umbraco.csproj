@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>MYA.RequestProtect.Umbraco</RootNamespace>
+    <AssemblyName>MYA.RequestProtect.Umbraco</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>Moriyama.RequestProtect.Umbraco</PackageId>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Copyright © Moriyama Limited $([System.DateTime]::Now.Year)</Copyright>
+    <Authors>Moriyama Limited;Nik Rimington;Matthew Wise</Authors>
+    <Company>Moriyama Limited</Company>
+    <Description>Umbraco integration for Moriyama.RequestProtect - making it easy to protect your Umbraco website using IP whitelisting, URL pattern matching, and query string authentication.</Description>
+    <PackageProjectUrl>https://github.com/moriyama/MYA.RequestProtect</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/moriyama/MYA.RequestProtect</RepositoryUrl>
+    <PackageTags>umbraco;aspnetcore;middleware;authentication;security;protection;ip-whitelisting</PackageTags>
+    <PackageIcon>logo.svg</PackageIcon>
+    <PackageIconUrl>https://raw.githubusercontent.com/Moriyama-Umbraco/MYA.RequestProtect/main/docs/logo.svg</PackageIconUrl>
+    <PackageReadmeFile>README_umbraco_nuget.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Umbraco.Cms.Core" Version="13.9.1" />
+    <PackageReference Include="Umbraco.Cms.Web.Common" Version="13.9.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MYA.RequestProtect\MYA.RequestProtect.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\docs\README_umbraco_nuget.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\docs\logo.svg" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

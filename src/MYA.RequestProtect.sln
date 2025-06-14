@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MYA.RequestProtect.Umbraco", "MYA.RequestProtect.Umbraco\MYA.RequestProtect.Umbraco.csproj", "{2D762388-0752-445B-BCCB-E1412BD26402}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{ECB0B061-CC22-4007-926F-48210F5344F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECB0B061-CC22-4007-926F-48210F5344F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECB0B061-CC22-4007-926F-48210F5344F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D762388-0752-445B-BCCB-E1412BD26402}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D762388-0752-445B-BCCB-E1412BD26402}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D762388-0752-445B-BCCB-E1412BD26402}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D762388-0752-445B-BCCB-E1412BD26402}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
