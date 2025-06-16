@@ -1,0 +1,43 @@
+{
+    "$schema": "https://marketplace.umbraco.com/umbraco-marketplace-schema.json",
+    "AuthorDetails": {
+        "Name": "Moriyama Limited",
+        "Description": "Digital Consultancy specializing in .Net and the Umbraco CMS",
+        "Url": "https://www.moriyama.co.uk",
+        "Contributors": [
+            {
+                "Name": "Nik Rimington",
+                "Url": "https://github.com/NikRimington"
+            },
+            {
+                "Name": "Matthew Wise",
+                "Url": "https://github.com/Matthew-Wise"
+            }
+        ]
+    },
+    "Category": "Developer Tools",
+    "Description": "A flexible middleware component that provides IP whitelisting, URL pattern matching, and query string authentication for protecting areas of your Umbraco website. Perfect for securing preview environments, staging sites, or restricting access to specific content.",
+    "DocumentationUrl": "https://github.com/Moriyama-Umbraco/MYA.RequestProtect",
+    "LicenseTypes": ["Free"],
+    "IssueTrackerUrl": "https://github.com/Moriyama-Umbraco/MYA.RequestProtect/issues",
+    "PackageType": "Package",
+    "PackagesByAuthor": [
+        "Moriyama.PreviewPDF.IronPDF",
+        "Moriyama.PreviewPDF.ABCpdf"
+    ],
+    "RelatedPackages": [
+        {
+            "PackageId": "Moriyama.RequestProtect",
+            "Description": "Core package containing the request protection middleware"
+        }
+    ],
+    "Tags": [
+        "security",
+        "authentication",
+        "protection",
+        "ip-whitelisting",
+        "preview"
+    ],
+    "Title": "Request Protect for Umbraco",
+    "ReleasesUrl": "https://github.com/Moriyama-Umbraco/MYA.RequestProtect/releases"    
+}

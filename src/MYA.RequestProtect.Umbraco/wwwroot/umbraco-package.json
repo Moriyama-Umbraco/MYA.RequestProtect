@@ -1,0 +1,8 @@
+{
+    "$schema": "../../umbraco-package-schema.json",
+    "id": "Moriyama.RequestProtect.Umbraco",
+    "name": "Moriyama Request Protect",
+    "version": "1.0.0",
+    "allowTelemetry": true,
+    "allowPublicAccess": true
+}
