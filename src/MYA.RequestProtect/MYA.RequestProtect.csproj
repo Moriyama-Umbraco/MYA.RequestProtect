@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>MYA.RequestProtect</RootNamespace>
+		<AssemblyName>MYA.RequestProtect</AssemblyName>
+      <OutputType>Library</OutputType>
+      <IsPackable>true</IsPackable>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<PackageId>Moriyama.RequestProtect</PackageId>
+		<Version>1.0.0</Version>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+		<FileVersion>1.0.0.0</FileVersion>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Copyright>Copyright © Moriyama Limited $([System.DateTime]::Now.Year)</Copyright>
+		<Authors>Moriyama Limited;Nik Rimington;Matthew Wise</Authors>
+		<Company>Moriyama Limited</Company>
+		<Description>A flexible and powerful ASP.NET Core middleware for protecting web requests through IP whitelisting, URL pattern matching, and query string authentication.</Description>
+		<PackageProjectUrl>https://github.com/moriyama/MYA.RequestProtect</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/moriyama/MYA.RequestProtect</RepositoryUrl>
+		<PackageTags>aspnetcore;middleware;authentication;security;protection;ip-whitelisting</PackageTags>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageIcon>logo.png</PackageIcon>
+		<PackageIconUrl>https://raw.githubusercontent.com/Moriyama-Umbraco/MYA.RequestProtect/main/docs/logo.svg</PackageIconUrl>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\.github\README.md" Pack="true" PackagePath="\" />
+		<None Include="..\..\docs\logo.png" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.3.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<_Parameter1>MYA.RequestProtect.Tests</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
+
+</Project>

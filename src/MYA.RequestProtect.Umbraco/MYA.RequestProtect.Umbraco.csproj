@@ -1,0 +1,59 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+	<PropertyGroup>
+		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>MYA.RequestProtect.Umbraco</RootNamespace>
+		<AssemblyName>MYA.RequestProtect.Umbraco</AssemblyName>
+      <OutputType>Library</OutputType>
+      <IsPackable>true</IsPackable>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<PackageId>Moriyama.RequestProtect.Umbraco</PackageId>
+		<Version>1.0.0</Version>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+		<FileVersion>1.0.0.0</FileVersion>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Copyright>Copyright © Moriyama Limited $([System.DateTime]::Now.Year)</Copyright>
+		<Authors>Moriyama Limited;Nik Rimington;Matthew Wise</Authors>
+		<Company>Moriyama Limited</Company>
+		<Description>Umbraco integration for Moriyama.RequestProtect - making it easy to protect your Umbraco website using IP whitelisting, URL pattern matching, and query string authentication.</Description>
+		<PackageProjectUrl>https://github.com/moriyama/MYA.RequestProtect</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/moriyama/MYA.RequestProtect</RepositoryUrl>
+		<PackageTags>umbraco;aspnetcore;middleware;authentication;security;protection;ip-whitelisting;umbraco-marketplace</PackageTags>
+		<PackageIcon>logo.png</PackageIcon>
+		<PackageIconUrl>https://raw.githubusercontent.com/Moriyama-Umbraco/MYA.RequestProtect/main/docs/logo.svg</PackageIconUrl>
+		<PackageReadmeFile>README_umbraco_nuget.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<!-- .NET 8.0 References -->
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+		<!-- Umbraco 13/14/15 -->
+		<PackageReference Include="Umbraco.Cms.Core" Version="[13.9.0,16.0.0)" />
+		<PackageReference Include="Umbraco.Cms.Web.Common" Version="[13.9.0,16.0.0)" />
+	</ItemGroup>
+
+	<!-- .NET 9.0 References -->
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net9.0' ">
+		<!-- Umbraco 16 -->
+		<PackageReference Include="Umbraco.Cms.Core" Version="[16.0.0,17.0.0)" />
+		<PackageReference Include="Umbraco.Cms.Web.Common" Version="[16.0.0,17.0.0)" />
+	</ItemGroup>
+
+    <PropertyGroup Condition=" '$(TargetFramework)' == 'net9.0' ">
+        <StaticWebAssetBasePath>App_Plugins/Moriyama.RequestProtect</StaticWebAssetBasePath>
+    </PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\docs\README_umbraco_nuget.md" Pack="true" PackagePath="\" />
+		<None Include="..\..\docs\logo.png" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\MYA.RequestProtect\MYA.RequestProtect.csproj" />
+	</ItemGroup>
+
+</Project>
