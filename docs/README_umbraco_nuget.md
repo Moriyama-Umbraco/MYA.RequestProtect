@@ -24,19 +24,22 @@ dotnet add package Moriyama.RequestProtect.Umbraco
 
 ```json
 {
-  "MYA:RP": {
-    "Enabled": true,
-    "QueryKey": "auth",
-    "Code": "your_secret_code",
-    "Rules": {
-      "IPWhitelist": ["127.0.0.1"],
-      "AuthRules": [
-        {
-          "Pattern": "/preview/*",
-          "AppliesTo": "Path",
-          "RequiresQueryString": true
-        }
-      ]
+  "MYA":
+  {  
+    "RP": {
+      "Enabled": true,
+      "QueryKey": "auth",
+      "Code": "your_secret_code",
+      "Rules": {
+        "IPWhitelist": ["127.0.0.1"],
+        "AuthRules": [
+          {
+            "Pattern": "/preview/*",
+            "AppliesTo": "Path",
+            "RequiresQueryString": true
+          }
+        ]
+      }
     }
   }
 }
@@ -50,18 +53,21 @@ dotnet add package Moriyama.RequestProtect.Umbraco
 
 ```json
 {
-  "MYA:RP": {
-    "Enabled": true,
-    "QueryKey": "preview",
-    "Code": "your_secret_code",
-    "Rules": {
-      "AuthRules": [
-        {
-          "Pattern": "/preview/*",
-          "AppliesTo": "Path",
-          "RequiresQueryString": true
-        }
-      ]
+  "MYA":
+  {
+    "RP": {
+      "Enabled": true,
+      "QueryKey": "preview",
+      "Code": "your_secret_code",
+      "Rules": {
+        "AuthRules": [
+          {
+            "Pattern": "/preview/*",
+            "AppliesTo": "Path",
+            "RequiresQueryString": true
+          }
+        ]
+      }
     }
   }
 }
@@ -71,19 +77,22 @@ dotnet add package Moriyama.RequestProtect.Umbraco
 
 ```json
 {
-  "MYA:RP": {
-    "Enabled": true,
-    "Rules": {
-      "IPWhitelist": [
-        "office.ip.address",
-        "vpn.ip.address"
-      ],
-      "AuthRules": [
-        {
-          "Pattern": "staging.website.com",
-          "AppliesTo": "Host"
-        }
-      ]
+  "MYA":
+  { 
+    "RP": {
+      "Enabled": true,
+      "Rules": {
+        "IPWhitelist": [
+          "office.ip.address",
+          "vpn.ip.address"
+        ],
+        "AuthRules": [
+          {
+            "Pattern": "staging.website.com",
+            "AppliesTo": "Host"
+          }
+        ]
+      }
     }
   }
 }
@@ -93,16 +102,19 @@ dotnet add package Moriyama.RequestProtect.Umbraco
 
 ```json
 {
-  "MYA:RP": {
-    "Enabled": true,
-    "Rules": {
-      "IPWhitelist": ["office.ip.range.*"],
-      "AuthRules": [
-        {
-          "Pattern": "/umbraco/*",
-          "AppliesTo": "Path"
-        }
-      ]
+  "MYA": 
+  {
+    "RP": {
+      "Enabled": true,
+      "Rules": {
+        "IPWhitelist": ["office.ip.range.*"],
+        "AuthRules": [
+          {
+            "Pattern": "/umbraco/*",
+            "AppliesTo": "Path"
+          }
+        ]
+      }
     }
   }
 }

@@ -38,10 +38,13 @@ app.UseMiddleware<RequestProtectMiddleware>();
 
 ```json
 {
-  "MYA:RP": {
-    "Enabled": true,
-    "QueryKey": "auth",
-    "Code": "your_secret_code"
+  "MYA":
+  {
+    "RP": {
+      "Enabled": true,
+      "QueryKey": "auth",
+      "Code": "your_secret_code"
+    }
   }
 }
 ```

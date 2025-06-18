@@ -52,19 +52,22 @@ app.UseMiddleware<RequestProtectMiddleware>();
 
 ```json
 {
-  "MYA:RP": {
-    "Enabled": true,
-    "QueryKey": "auth",
-    "Code": "your_secret_code",
-    "Rules": {
-      "IPWhitelist": ["127.0.0.1", "::1"],
-      "AuthRules": [
-        {
-          "Pattern": "/api/*",
-          "AppliesTo": "Path",
-          "RequiresQueryString": true
-        }
-      ]
+  "MYA":
+  {
+    "RP": {
+      "Enabled": true,
+      "QueryKey": "auth",
+      "Code": "your_secret_code",
+      "Rules": {
+        "IPWhitelist": ["127.0.0.1", "::1"],
+        "AuthRules": [
+          {
+            "Pattern": "/api/*",
+            "AppliesTo": "Path",
+            "RequiresQueryString": true
+          }
+        ]
+      }
     }
   }
 }
@@ -93,18 +96,21 @@ Each rule in the `AuthRules` collection can specify:
 
 ```json
 {
-  "MYA:RP": {
-    "Enabled": true,
-    "QueryKey": "auth",
-    "Code": "secret123",
-    "Rules": {
-      "AuthRules": [
-        {
-          "Pattern": "/api/*",
-          "AppliesTo": "Path",
-          "RequiresQueryString": true
-        }
-      ]
+  "MYA":
+  {
+    "RP": {
+      "Enabled": true,
+      "QueryKey": "auth",
+      "Code": "secret123",
+      "Rules": {
+        "AuthRules": [
+          {
+            "Pattern": "/api/*",
+            "AppliesTo": "Path",
+            "RequiresQueryString": true
+          }
+        ]
+      }
     }
   }
 }
@@ -116,10 +122,13 @@ This configuration will require query string authentication for all routes start
 
 ```json
 {
-  "MYA:RP": {
-    "Enabled": true,
-    "Rules": {
-      "IPWhitelist": ["192.168.1.100", "10.0.0.*"]
+  "MYA":
+  {
+    "RP": {
+      "Enabled": true,
+      "Rules": {
+        "IPWhitelist": ["192.168.1.100", "10.0.0.*"]
+      }
     }
   }
 }

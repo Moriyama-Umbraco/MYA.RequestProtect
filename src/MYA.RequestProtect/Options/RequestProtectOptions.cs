@@ -2,7 +2,7 @@ namespace MYA.RequestProtect.Options;
 
 public class RequestProtectOptions
 {
-    public const string Key = "MYA:RA";
+    public const string Key = "MYA:RP";
 
     public bool Enabled { get; set; }
 
