@@ -12,17 +12,17 @@
 
 	<PropertyGroup>
 		<PackageId>Moriyama.RequestProtect.Umbraco</PackageId>
-		<Version>1.0.0</Version>
-		<AssemblyVersion>1.0.0.0</AssemblyVersion>
-		<FileVersion>1.0.0.0</FileVersion>
+		<Version>1.0.1</Version>
+		<AssemblyVersion>1.0.1.0</AssemblyVersion>
+		<FileVersion>1.0.1.0</FileVersion>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Copyright>Copyright © Moriyama Limited $([System.DateTime]::Now.Year)</Copyright>
 		<Authors>Moriyama Limited;Nik Rimington;Matthew Wise</Authors>
 		<Company>Moriyama Limited</Company>
 		<Description>Umbraco integration for Moriyama.RequestProtect - making it easy to protect your Umbraco website using IP whitelisting, URL pattern matching, and query string authentication.</Description>
-		<PackageProjectUrl>https://github.com/moriyama/MYA.RequestProtect</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/moriyama/MYA.RequestProtect</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/Moriyama-Umbraco/MYA.RequestProtect</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/Moriyama-Umbraco/MYA.RequestProtect</RepositoryUrl>
 		<PackageTags>umbraco;aspnetcore;middleware;authentication;security;protection;ip-whitelisting;umbraco-marketplace</PackageTags>
 		<PackageIcon>logo.png</PackageIcon>
 		<PackageIconUrl>https://raw.githubusercontent.com/Moriyama-Umbraco/MYA.RequestProtect/main/docs/logo.svg</PackageIconUrl>

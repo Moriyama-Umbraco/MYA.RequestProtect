@@ -48,8 +48,8 @@ app.UseMiddleware<RequestProtectMiddleware>();
 
 ## Documentation
 
-For complete documentation, including detailed configuration options, examples, and best practices, please visit our [GitHub Repository](https://github.com/moriyama/MYA.RequestProtect).
+For complete documentation, including detailed configuration options, examples, and best practices, please visit our [GitHub Repository](https://github.com/Moriyama-Umbraco/MYA.RequestProtect).
 
 ## Support
 
-If you encounter any issues or need support, please create an issue in our [GitHub Repository](https://github.com/moriyama/MYA.RequestProtect/issues).
+If you encounter any issues or need support, please create an issue in our [GitHub Repository](https://github.com/Moriyama-Umbraco/MYA.RequestProtect/issues).

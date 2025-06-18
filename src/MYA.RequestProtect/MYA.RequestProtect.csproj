@@ -12,25 +12,25 @@
 
 	<PropertyGroup>
 		<PackageId>Moriyama.RequestProtect</PackageId>
-		<Version>1.0.0</Version>
-		<AssemblyVersion>1.0.0.0</AssemblyVersion>
-		<FileVersion>1.0.0.0</FileVersion>
+		<Version>1.0.1</Version>
+		<AssemblyVersion>1.0.1.0</AssemblyVersion>
+		<FileVersion>1.0.1.0</FileVersion>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Copyright>Copyright © Moriyama Limited $([System.DateTime]::Now.Year)</Copyright>
 		<Authors>Moriyama Limited;Nik Rimington;Matthew Wise</Authors>
 		<Company>Moriyama Limited</Company>
 		<Description>A flexible and powerful ASP.NET Core middleware for protecting web requests through IP whitelisting, URL pattern matching, and query string authentication.</Description>
-		<PackageProjectUrl>https://github.com/moriyama/MYA.RequestProtect</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/moriyama/MYA.RequestProtect</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/Moriyama-Umbraco/MYA.RequestProtect</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/Moriyama-Umbraco/MYA.RequestProtect</RepositoryUrl>
 		<PackageTags>aspnetcore;middleware;authentication;security;protection;ip-whitelisting</PackageTags>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageReadmeFile>README_nuget.md</PackageReadmeFile>
 		<PackageIcon>logo.png</PackageIcon>
 		<PackageIconUrl>https://raw.githubusercontent.com/Moriyama-Umbraco/MYA.RequestProtect/main/docs/logo.svg</PackageIconUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="..\..\.github\README.md" Pack="true" PackagePath="\" />
+		<None Include="..\..\docs\README_nuget.md" Pack="true" PackagePath="\" />
 		<None Include="..\..\docs\logo.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 

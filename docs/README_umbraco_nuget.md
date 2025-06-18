@@ -110,8 +110,8 @@ dotnet add package Moriyama.RequestProtect.Umbraco
 
 ## Documentation
 
-For complete documentation of the core package features, please visit our [GitHub Repository](https://github.com/moriyama/MYA.RequestProtect).
+For complete documentation of the core package features, please visit our [GitHub Repository](https://github.com/Moriyama-Umbraco/MYA.RequestProtect).
 
 ## Support
 
-If you encounter any issues or need support, please create an issue in our [GitHub Repository](https://github.com/moriyama/MYA.RequestProtect/issues).
+If you encounter any issues or need support, please create an issue in our [GitHub Repository](https://github.com/Moriyama-Umbraco/MYA.RequestProtect/issues).
