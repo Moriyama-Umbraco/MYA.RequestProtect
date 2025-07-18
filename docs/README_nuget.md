@@ -6,6 +6,7 @@ A flexible and powerful ASP.NET Core middleware for protecting web requests thro
 
 - 🔒 Request protection through multiple authentication methods
 - 🌐 IP address whitelisting
+- 📨 Header authorisation
 - 🔑 Query string authentication
 - 🎯 URL pattern matching rules
 - 🍪 Automatic cookie-based authentication after successful validation
@@ -38,21 +39,18 @@ app.UseMiddleware<RequestProtectMiddleware>();
 
 ```json
 {
-  "MYA":
-  {
-    "RP": {
-      "Enabled": true,
-      "QueryKey": "auth",
-      "Code": "your_secret_code"
-    }
+  "MYA:RP": {
+    "Enabled": true,
+    "QueryKey": "auth",
+    "Code": "your_secret_code"
   }
 }
 ```
 
 ## Documentation
 
-For complete documentation, including detailed configuration options, examples, and best practices, please visit our [GitHub Repository](https://github.com/Moriyama-Umbraco/MYA.RequestProtect).
+For complete documentation, including detailed configuration options, examples, and best practices, please visit our [GitHub Repository](https://github.com/moriyama-umbraco/MYA.RequestProtect).
 
 ## Support
 
-If you encounter any issues or need support, please create an issue in our [GitHub Repository](https://github.com/Moriyama-Umbraco/MYA.RequestProtect/issues).
+If you encounter any issues or need support, please create an issue in our [GitHub Repository](https://github.com/moriyama-umbraco/MYA.RequestProtect/issues).

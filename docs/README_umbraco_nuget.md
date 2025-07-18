@@ -6,6 +6,7 @@ Seamlessly integrate request protection into your Umbraco website. This package 
 
 - 🔒 Protect your Umbraco backoffice and content
 - 🌐 IP whitelist specific sections of your site, like /preview/
+- 📨 Use Header authorisation to allow third party systems/other websites to bypass blocks
 - 🔑 Enable preview links with secure query string authentication
 - 🎯 Pattern matching for Umbraco URLs and routes
 - 🍪 Automatic cookie-based authentication after validation
