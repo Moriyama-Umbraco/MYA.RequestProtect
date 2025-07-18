@@ -88,4 +88,23 @@ public class RequestProtectMiddlewareTests
         await Verify(response)
             .UseFileName(TestContext.Current.Test.FileSafeTestName());
     }
+
+    [Theory()]
+    [ClassData(typeof(RequestProtectOptionsWithHeaderTestCases))]
+    public async Task Auth_HeaderRule_Tests(RequestProtectOptions options, string url)
+    {
+        // Arrange
+        using var server = Host.CreateTestServer(logger, options);
+        var client = server.CreateClient();
+
+        // Act
+        var response = await client.GetAsync(url, TestContext.Current.CancellationToken);
+
+
+
+
+        // Assert
+        await Verify(response)
+            .UseFileName(TestContext.Current.Test.FileSafeTestName());
+    }
 }

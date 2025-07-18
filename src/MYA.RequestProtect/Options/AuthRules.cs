@@ -6,5 +6,7 @@ public class AuthRules
 
     public string[]? IpWhitelist { get; set; }	
 
+    public HeaderDetail[]? Headers { get; set; }
+
     public AuthRule[]? Rules { get; set; } = [];
 }
