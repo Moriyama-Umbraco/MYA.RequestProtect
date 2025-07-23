@@ -29,6 +29,10 @@
         {
             "PackageId": "Moriyama.RequestProtect",
             "Description": "Core package containing the request protection middleware"
+        },
+        {
+            "PackageId": "Moriyama.RequestProtect.Umbraco.Admin",
+            "Description": "Admin dashboard package for Moriyama.RequestProtect"
         }
     ],
     "Tags": [

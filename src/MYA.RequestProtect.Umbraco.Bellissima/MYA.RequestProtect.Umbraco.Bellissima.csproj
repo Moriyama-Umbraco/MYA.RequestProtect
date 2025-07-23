@@ -9,9 +9,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>MYA.RequestProtect.Umbraco.Admin</PackageId>
-    <Product>MYA.RequestProtect.Umbraco.Admin</Product>
-    <Title>MYA.RequestProtect.Umbraco.Admin</Title>
+    <PackageId>Moriyama.RequestProtect.Umbraco.Admin</PackageId>
+    <Product>Moriyama.RequestProtect.Umbraco.Admin</Product>
+    <Title>Moriyama.RequestProtect.Umbraco.Admin</Title>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -29,11 +29,11 @@
 		<PackageTags>umbraco;aspnetcore;middleware;authentication;security;protection;ip-whitelisting;umbraco-marketplace</PackageTags>
 		<PackageIcon>logo.png</PackageIcon>
 		<PackageIconUrl>https://raw.githubusercontent.com/Moriyama-Umbraco/MYA.RequestProtect/main/docs/logo.svg</PackageIconUrl>
-		<PackageReadmeFile>README_umbraco_nuget.md</PackageReadmeFile>
+		<PackageReadmeFile>README_umbraco_admin_nuget.md</PackageReadmeFile>
 	</PropertyGroup>
 
   <ItemGroup>
-		<None Include="..\..\docs\README_umbraco_nuget.md" Pack="true" PackagePath="\" />
+		<None Include="..\..\docs\README_umbraco_admin_nuget.md" Pack="true" PackagePath="\" />
 		<None Include="..\..\docs\logo.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
