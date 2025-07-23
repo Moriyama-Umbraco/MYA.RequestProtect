@@ -99,10 +99,32 @@ public sealed class RequestProtectMiddleware
             return true;
         }
 
+        if(HeadersAuthorised(context))
+        {
+            return true;
+        }
+
         if (config.Rules.Rules?.Length > 0)
         {
             var rulesResults = config.Rules.Rules.Any(r => r.Enabled && DoesRulePass(r, context.Request));
             return !rulesResults; //If any rules pass the we need to verify the code
+        }
+
+        return false;
+    }
+
+    private bool HeadersAuthorised(HttpContext context)
+    {
+        if (config.Rules.Headers is null || config.Rules.Headers.Length == 0) return false;
+
+        foreach(var header in config.Rules.Headers)
+        {
+            if(context.Request.Headers.ContainsKey(header.Header))
+            {
+                if (header.Value == "*") return true;
+
+                if (context.Request.Headers[header.Header] == header.Value) return true;
+            }
         }
 
         return false;

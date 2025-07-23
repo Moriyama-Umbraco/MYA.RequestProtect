@@ -10,6 +10,7 @@ A flexible and powerful ASP.NET Core middleware for protecting web requests thro
 
 - 🔒 Request protection through multiple authentication methods
 - 🌐 IP address whitelisting
+- 📨 Header authorisation
 - 🔑 Query string authentication
 - 🎯 URL pattern matching rules
 - 🍪 Automatic cookie-based authentication after successful validation
@@ -135,6 +136,33 @@ This configuration will require query string authentication for all routes start
 ```
 
 This configuration will only allow requests from the specified IP addresses.
+
+### Header Authorisation
+
+In some situations (Azure for example) IP White listing can be excessive, this feature allows for checking that a specific header exists. It can "just" exist (wild card value) or it can be limited to a specific value.
+
+```json
+{
+  "MYA":
+  {
+    "RP": {
+      "Enabled": true,
+      "Rules": {
+        "Headers": [
+          {
+            "Header": "myHeader",
+            "Value": "someSecureValue"
+          },
+          {
+            "Header": "wildCardHeader",
+            "Value": "*"
+          }
+        ]
+      }
+    }
+  }
+}
+```
 
 ## Contributing
 

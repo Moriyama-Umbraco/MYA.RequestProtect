@@ -59,6 +59,9 @@ internal static class Host
                 app.Use(async (context, next) =>
                 {
                     context.Connection.RemoteIpAddress = IPAddress.Parse(RemoteIP);
+                    context.Request.Headers["singleHeader"] = "singleHeader";
+                    context.Request.Headers["wildHeader"] = "wildHeader";
+                    context.Request.Headers["headerTwo"] = "2";
                     await next();
                 });
 
