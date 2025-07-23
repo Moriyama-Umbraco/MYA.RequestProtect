@@ -1,0 +1,81 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <StaticWebAssetBasePath>/</StaticWebAssetBasePath>
+    <OutputType>Library</OutputType>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>MYA.RequestProtect.Umbraco.Admin</PackageId>
+    <Product>MYA.RequestProtect.Umbraco.Admin</Product>
+    <Title>MYA.RequestProtect.Umbraco.Admin</Title>
+  </PropertyGroup>
+
+  <PropertyGroup>
+		<Version>16.0.0</Version>
+		<AssemblyVersion>16.0.0.0</AssemblyVersion>
+		<FileVersion>16.0.0.0</FileVersion>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Copyright>Copyright © Moriyama Limited $([System.DateTime]::Now.Year)</Copyright>
+		<Authors>Moriyama Limited;Nik Rimington;Matthew Wise</Authors>
+		<Company>Moriyama Limited</Company>
+		<Description>Umbraco Backoffice UI integration for Moriyama.RequestProtect - making it easy to see your protection configuration.</Description>
+		<PackageProjectUrl>https://github.com/Moriyama-Umbraco/MYA.RequestProtect</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/Moriyama-Umbraco/MYA.RequestProtect</RepositoryUrl>
+		<PackageTags>umbraco;aspnetcore;middleware;authentication;security;protection;ip-whitelisting;umbraco-marketplace</PackageTags>
+		<PackageIcon>logo.png</PackageIcon>
+		<PackageIconUrl>https://raw.githubusercontent.com/Moriyama-Umbraco/MYA.RequestProtect/main/docs/logo.svg</PackageIconUrl>
+		<PackageReadmeFile>README_umbraco_nuget.md</PackageReadmeFile>
+	</PropertyGroup>
+
+  <ItemGroup>
+		<None Include="..\..\docs\README_umbraco_nuget.md" Pack="true" PackagePath="\" />
+		<None Include="..\..\docs\logo.png" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Umbraco.Cms.Web.Website" Version="16.0.0" />
+    <PackageReference Include="Umbraco.Cms.Web.Common" Version="16.0.0" />
+    <PackageReference Include="Umbraco.Cms.Api.Common" Version="16.0.0" />
+    <PackageReference Include="Umbraco.Cms.Api.Management" Version="16.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ClientAssetsInputs Include="Client\**" Exclude="$(DefaultItemExcludes)" />
+
+    <!-- Dont include the client folder as part of packaging nuget build -->
+    <Content Remove="Client\**" />
+
+    <!-- However make the Umbraco-package.json included for dotnet pack or nuget package and visible to the solution -->
+    <None Include="Client\public\umbraco-package.json" Pack="false" />
+      
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MYA.RequestProtect.Umbraco\MYA.RequestProtect.Umbraco.csproj" />
+  </ItemGroup>
+
+  <!-- Restore and build Client files -->
+  <Target Name="RestoreClient" Inputs="Client\package.json;Client\package-lock.json" Outputs="Client\node_modules\.package-lock.json">
+    <Message Importance="high" Text="Restoring Client NPM packages..." />
+    <Exec Command="npm i" WorkingDirectory="Client" />
+  </Target>
+
+  <Target Name="BuildClient" BeforeTargets="AssignTargetPaths" DependsOnTargets="RestoreClient" Inputs="@(ClientAssetsInputs)" Outputs="$(IntermediateOutputPath)client.complete.txt">
+    <Message Importance="high" Text="Executing Client NPM build script..." />
+    <Exec Command="npm run build" WorkingDirectory="Client" />
+    <ItemGroup>
+      <_ClientAssetsBuildOutput Include="wwwroot\App_Plugins\**" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(IntermediateOutputPath)client.complete.txt" Lines="@(_ClientAssetsBuildOutput)" Overwrite="true" />
+  </Target>
+
+</Project>

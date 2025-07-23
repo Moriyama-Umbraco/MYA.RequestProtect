@@ -1,0 +1,15 @@
+{
+    "$schema": "../../../MYA.RequestProtect.UmbracoTestSite/umbraco-package-schema.json",
+    "id": "MYA.RequestProtect.Umbraco.Admin",
+    "name": "MYA.RequestProtect.Umbraco.Admin",
+    "version": "1.0.0",
+    "allowTelemetry": true,
+    "extensions": [
+        {
+            "alias": "MYA.RequestProtect.Umbraco.Admin.Bundle",
+            "js": "/App_Plugins/Moriyama.RequestProtect.Admin/mya-request-protect-umbraco-admin.js",
+            "name": "MYA Request Protect Umbraco Admin Bundle",
+            "type": "bundle"
+        }
+    ]
+}
