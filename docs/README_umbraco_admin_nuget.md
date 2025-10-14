@@ -14,6 +14,7 @@ Provides a simple admin dashboard for seeing the current configuration for Moriy
 dotnet add package Moriyama.RequestProtect.Umbraco.Admin
 ```
 
+Add the users who should be able to see the admin dashboard to the user group `Request Protect`. After that, they will find the dashboard in the Settings section of Umbraco.
 
 ## Documentation
 
