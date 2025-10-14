@@ -1,3 +1,4 @@
+
 namespace MYA.RequestProtect.Options;
 
 public class RequestProtectOptions
@@ -11,4 +12,6 @@ public class RequestProtectOptions
     public required string Code { get; set; }
 
     public AuthRules Rules { get; set; } = new();
+
+    public ResponseOptions Response { get; set; } = new();
 }

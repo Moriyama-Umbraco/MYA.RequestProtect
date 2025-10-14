@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
+using MYA.RequestProtect.Enums;
 using MYA.RequestProtect.Logging;
 using MYA.RequestProtect.Options;
 using MYA.RequestProtect.Setup;
@@ -13,18 +14,20 @@ public sealed class RequestProtectMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger logger;
     private readonly IDatetimeProvider dateTimeProvider;
-
+    private readonly IWebHostEnvironment hostingEnvironment;
     private const string RequestProtectCookieName = "MYAPA";
 
-    public RequestProtectMiddleware(RequestDelegate next, 
-        ILogger<RequestProtectMiddleware> logger, 
+    public RequestProtectMiddleware(RequestDelegate next,
+        ILogger<RequestProtectMiddleware> logger,
         IOptionsMonitor<RequestProtectOptions> config,
-        IDatetimeProvider dateTimeProvider)
+        IDatetimeProvider dateTimeProvider,
+        IWebHostEnvironment hostingEnvironment)
     {
         this.config = config.CurrentValue;
         _next = next;
         this.logger = logger;
         this.dateTimeProvider = dateTimeProvider;
+        this.hostingEnvironment = hostingEnvironment;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -54,12 +57,96 @@ public sealed class RequestProtectMiddleware
         }
         else
         {
-            context.Response.StatusCode = 400;
-            await context.Response.WriteAsync("Bad Request: Unknown path");
+            await HandleUnAutorisedRequest(context);
             return;
         }
 
         await _next(context);
+    }
+
+    private async Task HandleUnAutorisedRequest(HttpContext context)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(config.Response.Destination))
+            {
+                await DefaultResponse(context);
+                return;
+            }
+
+            switch (config.Response.ResponseType)
+            {
+                case ResponseTypes.Redirect:
+                    await HandleRedirectResponse(context);
+                    return;
+                case ResponseTypes.StaticFile:
+                    await HandleStaticFileResponse(context);
+                    return;
+                case ResponseTypes.Default:
+                default:
+                    await DefaultResponse(context);
+                    return;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error occured when Handling UnAutorisedRequest");
+
+            context.Response.StatusCode = 400;
+            await context.Response.WriteAsync("Bad Request: Unknown path");
+        }
+    }
+
+    private async Task HandleStaticFileResponse(HttpContext context)
+    {
+        if (string.IsNullOrWhiteSpace(config.Response.Destination))
+        {
+            await DefaultResponse(context);
+            return;
+        }
+
+        var file = hostingEnvironment.WebRootFileProvider.GetFileInfo(config.Response.Destination);
+        if (file.Exists)
+        {
+            using var readSteam = file.CreateReadStream();
+            using var reader = new StreamReader(readSteam);
+            var content = await reader.ReadToEndAsync();
+            await context.Response.WriteAsync(content);
+            return;
+        }
+
+        await DefaultResponse(context);
+    }
+
+    private async Task HandleRedirectResponse(HttpContext context)
+    {
+        if (!Uri.TryCreate(config.Response.Destination, UriKind.RelativeOrAbsolute, out var targetUri))
+        {
+            await DefaultResponse(context);
+            return;
+        }
+
+        var currentUri = new Uri($"{context.Request.Scheme}://{context.Request.Host}{context.Request.Path}");
+
+        if (!targetUri.IsAbsoluteUri)        
+        {
+            targetUri = new Uri(currentUri, targetUri);
+        }
+
+        if (currentUri.GetLeftPart(UriPartial.Path).Equals(targetUri.GetLeftPart(UriPartial.Path), StringComparison.OrdinalIgnoreCase))
+        {
+            // Would cause redirect loop - use default response instead
+            await DefaultResponse(context);
+            return;
+        }
+
+        context.Response.Redirect(targetUri.ToString());
+    }
+
+    private async Task DefaultResponse(HttpContext context)
+    {
+        context.Response.StatusCode = config.Response.StatusCode;
+        await context.Response.WriteAsync("Bad Request: Unknown path");
     }
 
     private bool RequestIsAuthorised(HttpContext context, out bool setCookie)
@@ -99,7 +186,7 @@ public sealed class RequestProtectMiddleware
             return true;
         }
 
-        if(HeadersAuthorised(context))
+        if (HeadersAuthorised(context))
         {
             return true;
         }
@@ -117,9 +204,9 @@ public sealed class RequestProtectMiddleware
     {
         if (config.Rules.Headers is null || config.Rules.Headers.Length == 0) return false;
 
-        foreach(var header in config.Rules.Headers)
+        foreach (var header in config.Rules.Headers)
         {
-            if(context.Request.Headers.ContainsKey(header.Header))
+            if (context.Request.Headers.ContainsKey(header.Header))
             {
                 if (header.Value == "*") return true;
 
@@ -153,6 +240,6 @@ public sealed class RequestProtectMiddleware
         return ruleResult;
     }
 
-    private static bool HasMiddlewareAuthCookie(HttpRequest request) 
+    private static bool HasMiddlewareAuthCookie(HttpRequest request)
         => request.Cookies.TryGetValue(RequestProtectCookieName, out var cookieVal) && !string.IsNullOrWhiteSpace(cookieVal);
 }
