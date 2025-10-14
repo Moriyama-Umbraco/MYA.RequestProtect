@@ -5,7 +5,7 @@ A flexible and powerful ASP.NET Core middleware for protecting web requests thro
 ## Features
 
 - 🔒 Request protection through multiple authentication methods
-- 🌐 IP address whitelisting
+- 🌐 IP address whitelisting (including support for CIDR notation)
 - 📨 Header authorisation
 - 🔑 Query string authentication
 - 🎯 URL pattern matching rules
