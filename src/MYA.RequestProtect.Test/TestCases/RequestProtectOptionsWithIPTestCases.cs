@@ -37,7 +37,7 @@ public class RequestProtectOptionsWithIPTestCases : IEnumerable<TheoryDataRow<Re
         Code = "valid_code",
         Rules = new AuthRules()
         {
-            IpWhitelist = [Host.RemoteIP, "127.0.0.1", "::1"]
+            IpWhitelist = ["203.0.113.32/28", "127.0.0.1", "::1"]
         }
     };
 

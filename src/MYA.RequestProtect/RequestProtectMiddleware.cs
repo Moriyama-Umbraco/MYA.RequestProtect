@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using MYA.RequestProtect.Logging;
 using MYA.RequestProtect.Options;
 using MYA.RequestProtect.Setup;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace MYA.RequestProtect;
@@ -94,7 +95,7 @@ public sealed class RequestProtectMiddleware
 
     private bool AuthNotNeeded(HttpContext context)
     {
-        if (config.Rules.IpWhitelist != null && config.Rules.IpWhitelist.Any(ip => ip.Equals(context.Connection.RemoteIpAddress?.ToString())))
+        if (config.Rules.IpWhitelist is not null && config.Rules.IpWhitelist.Length > 0 && IsIpAllowed(context.Connection.RemoteIpAddress))
         {
             return true;
         }
@@ -108,6 +109,28 @@ public sealed class RequestProtectMiddleware
         {
             var rulesResults = config.Rules.Rules.Any(r => r.Enabled && DoesRulePass(r, context.Request));
             return !rulesResults; //If any rules pass the we need to verify the code
+        }
+
+        return false;
+    }
+
+    private bool IsIpAllowed(IPAddress? remoteIp)
+    {
+        if (remoteIp is null) return false;
+        foreach(var ip in config.Rules.IpWhitelist!)
+        {
+            if (string.IsNullOrWhiteSpace(ip)) continue;
+            if(!ip.Contains('/') && ip.Equals(remoteIp.ToString())) return true;
+            return IsIpInCidrRange(remoteIp, ip);
+        }
+        return false;
+    }
+
+    static bool IsIpInCidrRange(IPAddress ipAddress, string cidrRange)
+    {
+        if (IPNetwork.TryParse(cidrRange, out var network))
+        {
+            return network.Contains(ipAddress);
         }
 
         return false;
