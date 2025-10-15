@@ -1,0 +1,6 @@
+<Project>
+	<ItemGroup>
+		<!-- Use Umbraco's schema system -->
+		<UmbracoJsonSchemaFiles Include="$(MSBuildThisFileDirectory)appsettings-schema.MYA.RequestProtect.json" />
+	</ItemGroup>
+</Project>

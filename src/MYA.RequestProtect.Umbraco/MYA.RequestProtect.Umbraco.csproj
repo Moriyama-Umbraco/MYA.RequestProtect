@@ -56,4 +56,13 @@
 		<ProjectReference Include="..\MYA.RequestProtect\MYA.RequestProtect.csproj" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == ''">
+		<!-- Link to the schema file from the main project -->
+		<None Include="..\MYA.RequestProtect\appsettings-schema.MYA.RequestProtect.json"
+			  Pack="true"
+			  PackagePath="build\"
+			  Link="appsettings-schema.MYA.RequestProtect.json" />
+		<None Include="build\Moriyama.RequestProtect.Umbraco.targets" Pack="true" PackagePath="build\" />
+	</ItemGroup>
+
 </Project>
