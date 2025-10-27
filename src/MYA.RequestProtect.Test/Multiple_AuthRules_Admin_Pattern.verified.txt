@@ -18,7 +18,7 @@
     Method: {
       Method: GET
     },
-    RequestUri: https://localhost/admin/dashboard?auth=valid_code,
+    RequestUri: https://myhost.localhost/admin/dashboard?auth=valid_code,
     Headers: []
   },
   IsSuccessStatusCode: true

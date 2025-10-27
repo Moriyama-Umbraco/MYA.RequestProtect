@@ -45,6 +45,13 @@ public class RequestProtectOptionsWithRegexTestCases : IEnumerable<TheoryDataRow
                     Pattern = "^/admin/.*",
                     Enabled = true,
                     AppliesTo = AppliesTo.Path
+                },
+                new()
+                {
+                    Name = "Admin Access",
+                    Pattern = "^(?!my[hH]ost\\.localhost).*$",
+                    Enabled = true,
+                    AppliesTo = AppliesTo.Host
                 }
             ]
         }
@@ -62,6 +69,9 @@ public class RequestProtectOptionsWithRegexTestCases : IEnumerable<TheoryDataRow
 
         yield return new TheoryDataRow<RequestProtectOptions, string>(MultipleAuthRulesTest, "/admin/dashboard?auth=valid_code") 
             { TestDisplayName = "Multiple_AuthRules_Admin_Pattern" };
+
+        yield return new TheoryDataRow<RequestProtectOptions, string>(MultipleAuthRulesTest, "/blog/post-1")
+        { TestDisplayName = "Multi_AuthRule_Pattern_Match_Host_Allow" };
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
