@@ -33,7 +33,7 @@ dotnet add package Moriyama.RequestProtect.Umbraco
       "Code": "your_secret_code",
       "Rules": {
         "IPWhitelist": ["127.0.0.1"],
-        "AuthRules": [
+        "Rules": [
           {
             "Pattern": "/preview/*",
             "AppliesTo": "Path",
@@ -61,7 +61,7 @@ dotnet add package Moriyama.RequestProtect.Umbraco
       "QueryKey": "preview",
       "Code": "your_secret_code",
       "Rules": {
-        "AuthRules": [
+        "Rules": [
           {
             "Pattern": "/preview/*",
             "AppliesTo": "Path",
@@ -87,9 +87,9 @@ dotnet add package Moriyama.RequestProtect.Umbraco
           "office.ip.address",
           "vpn.ip.address"
         ],
-        "AuthRules": [
+        "Rules": [
           {
-            "Pattern": "staging.website.com",
+            "Pattern": "^staging\\.website\\.com$",
             "AppliesTo": "Host"
           }
         ]
@@ -109,7 +109,7 @@ dotnet add package Moriyama.RequestProtect.Umbraco
       "Enabled": true,
       "Rules": {
         "IPWhitelist": ["office.ip.range.*"],
-        "AuthRules": [
+        "Rules": [
           {
             "Pattern": "/umbraco/*",
             "AppliesTo": "Path"

@@ -18,7 +18,7 @@
     Method: {
       Method: GET
     },
-    RequestUri: https://localhost/api/users?auth=valid_code,
+    RequestUri: https://myhost.localhost/api/users?auth=valid_code,
     Headers: []
   },
   IsSuccessStatusCode: true

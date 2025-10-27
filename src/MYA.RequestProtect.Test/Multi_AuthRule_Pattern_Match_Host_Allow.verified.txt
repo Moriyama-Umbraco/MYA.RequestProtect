@@ -5,20 +5,14 @@
   },
   StatusCode: OK,
   ReasonPhrase: OK,
-  Headers: [
-    {
-      Set-Cookie: [
-        MYAPA=638851536000000000; expires=Tue, 10 Jun 2025 12:30:00 GMT; path=/; secure; samesite=strict; httponly
-      ]
-    }
-  ],
+  Headers: [],
   TrailingHeaders: [],
   RequestMessage: {
     Version: 1.1,
     Method: {
       Method: GET
     },
-    RequestUri: https://myhost.localhost/blog/post-1?auth=valid_code,
+    RequestUri: https://myhost.localhost/blog/post-1,
     Headers: []
   },
   IsSuccessStatusCode: true

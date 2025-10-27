@@ -56,7 +56,7 @@ public class RequestProtectMiddlewareTests
     public async Task Auth_RegexRule_Tests(RequestProtectOptions options, string url)
     {
         // Arrange
-       using var server = Host.CreateTestServer(logger, options);
+       using var server = Host.CreateTestServer(logger, options, new Uri("https://myHost.localhost"));
         var client = server.CreateClient();
         
         // Act

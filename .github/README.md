@@ -61,7 +61,7 @@ app.UseMiddleware<RequestProtectMiddleware>();
       "Code": "your_secret_code",
       "Rules": {
         "IPWhitelist": ["127.0.0.1", "::1"],
-        "AuthRules": [
+        "Rules": [
           {
             "Pattern": "/api/*",
             "AppliesTo": "Path",
@@ -85,13 +85,11 @@ app.UseMiddleware<RequestProtectMiddleware>();
 
 ### Authentication Rules
 
-Each rule in the `AuthRules` collection can specify:
+Each rule in the `Rules` collection can specify:
 
 - `Pattern`: URL pattern to match (supports wildcards)
 - `AppliesTo`: What part of the request to match against (`Path`, `Host`, etc.)
 - `RequiresQueryString`: Whether the rule requires query string authentication
-
-## Examples
 
 ### Protecting API Routes
 
@@ -104,7 +102,7 @@ Each rule in the `AuthRules` collection can specify:
       "QueryKey": "auth",
       "Code": "secret123",
       "Rules": {
-        "AuthRules": [
+        "Rules": [
           {
             "Pattern": "/api/*",
             "AppliesTo": "Path",
@@ -163,6 +161,10 @@ In some situations (Azure for example) IP White listing can be excessive, this f
   }
 }
 ```
+
+### Further Examples
+
+For further examples, please check out our [Examples](../docs/examples.md) documentation.
 
 ## Contributing
 

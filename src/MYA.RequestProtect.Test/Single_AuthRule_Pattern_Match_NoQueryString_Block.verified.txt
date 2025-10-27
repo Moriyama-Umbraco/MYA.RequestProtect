@@ -12,7 +12,7 @@
     Method: {
       Method: GET
     },
-    RequestUri: https://localhost/blog/post-1,
+    RequestUri: https://myhost.localhost/blog/post-1,
     Headers: []
   },
   IsSuccessStatusCode: false
