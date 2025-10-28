@@ -6,8 +6,10 @@
 		<Nullable>enable</Nullable>
 		<RootNamespace>MYA.RequestProtect</RootNamespace>
 		<AssemblyName>MYA.RequestProtect</AssemblyName>
-      <OutputType>Library</OutputType>
-      <IsPackable>true</IsPackable>
+		<OutputType>Library</OutputType>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
+		<IsPackable>true</IsPackable>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -47,6 +49,26 @@
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<_Parameter1>MYA.RequestProtect.Tests</_Parameter1>
 		</AssemblyAttribute>
+	</ItemGroup>
+
+	<!-- Only generate schema once, not per target framework -->
+	<Target Name="GenerateConfigSchema" AfterTargets="Build" Condition="'$(TargetFramework)' == 'net8.0'">
+		<PropertyGroup>
+			<SchemaOutputPath>$(MSBuildProjectDirectory)\appsettings-schema.MYA.RequestProtect.json</SchemaOutputPath>
+			<SchemaGeneratorProject>$(MSBuildThisFileDirectory)..\MYA.RequestProtect.ScehmaGenerator\MYA.RequestProtect.ScehmaGenerator.csproj</SchemaGeneratorProject>
+		</PropertyGroup>
+
+		<Message Text="Generating JSON schema for RequestProtectOptions..." Importance="high" />
+
+		<!-- Run the generator -->
+		<Exec Command="dotnet run --project &quot;$(SchemaGeneratorProject)&quot; -- &quot;$(SchemaOutputPath)&quot;"
+			  WorkingDirectory="$(MSBuildThisFileDirectory)" />
+	</Target>
+
+	<!-- Include schema and targets file in NuGet package (only once, not per TFM) -->
+	<ItemGroup Condition="'$(TargetFramework)' == ''">
+		<None Include="appsettings-schema.MYA.RequestProtect.json" Pack="true" PackagePath="build\" />
+		<None Include="build\Moriyama.RequestProtect.targets" Pack="true" PackagePath="build\" />
 	</ItemGroup>
 
 </Project>

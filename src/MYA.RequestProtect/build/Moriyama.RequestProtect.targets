@@ -1,0 +1,7 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<JsonSchemaSegment Include="$(MSBuildThisFileDirectory)appsettings-schema.MYA.RequestProtect.json">
+			<FilePathPattern>appsettings\.json</FilePathPattern>
+		</JsonSchemaSegment>
+	</ItemGroup>
+</Project>
