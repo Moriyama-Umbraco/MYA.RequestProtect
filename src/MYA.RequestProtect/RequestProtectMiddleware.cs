@@ -57,14 +57,14 @@ public sealed class RequestProtectMiddleware
         }
         else
         {
-            await HandleUnAutorisedRequest(context);
+            await HandleUnAuthorisedRequest(context);
             return;
         }
 
         await _next(context);
     }
 
-    private async Task HandleUnAutorisedRequest(HttpContext context)
+    private async Task HandleUnAuthorisedRequest(HttpContext context)
     {
         try
         {
