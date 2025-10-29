@@ -1,4 +1,5 @@
 ﻿using MYA.RequestProtect.Enums;
+using System.Net.Mime;
 
 namespace MYA.RequestProtect.Options;
 
@@ -21,4 +22,6 @@ public class ResponseOptions
     /// HTTP status code to return when authentication fails (default: 400)
     /// </summary>
     public int StatusCode { get; set; } = 400;
+
+    public string MimeType { get; set; } = MediaTypeNames.Text.Html;
 }

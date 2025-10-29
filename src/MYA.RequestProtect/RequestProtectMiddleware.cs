@@ -112,7 +112,10 @@ public sealed class RequestProtectMiddleware
             using var readSteam = file.CreateReadStream();
             using var reader = new StreamReader(readSteam);
             var content = await reader.ReadToEndAsync();
+
+            context.Response.ContentType = config.Response.MimeType;
             await context.Response.WriteAsync(content);
+
             return;
         }
 
@@ -129,7 +132,7 @@ public sealed class RequestProtectMiddleware
 
         var currentUri = new Uri($"{context.Request.Scheme}://{context.Request.Host}{context.Request.Path}");
 
-        if (!targetUri.IsAbsoluteUri)        
+        if (!targetUri.IsAbsoluteUri)
         {
             targetUri = new Uri(currentUri, targetUri);
         }
@@ -204,10 +207,10 @@ public sealed class RequestProtectMiddleware
     private bool IsIpAllowed(IPAddress? remoteIp)
     {
         if (remoteIp is null) return false;
-        foreach(var ip in config.Rules.IpWhitelist!)
+        foreach (var ip in config.Rules.IpWhitelist!)
         {
             if (string.IsNullOrWhiteSpace(ip)) continue;
-            if(!ip.Contains('/') && ip.Equals(remoteIp.ToString())) return true;
+            if (!ip.Contains('/') && ip.Equals(remoteIp.ToString())) return true;
             return IsIpInCidrRange(remoteIp, ip);
         }
         return false;
