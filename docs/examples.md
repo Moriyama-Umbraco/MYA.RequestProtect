@@ -80,3 +80,24 @@ This config would mean that `/my-path` would be accessible, but `/secret/area` w
 }
 ```
 This example blocks any request unless it comes in on the host `my.allowed.host.com` without the query string, or if the IP address of the client falls in the CIDR range `122.122.122.0/24` or is `86.86.86.85`.
+
+## Example 5: Responed with a Static File
+```json
+{
+  "MYA":
+  { 
+    "RP": {
+      "Enabled": true,
+      "Code": "My-Auth-Code",
+      "Rules":{<Your rule's here>},
+      "Response": {
+        "ResponseType": "StaticFile",
+        "Destination": "error.html",
+        "StatusCode": 200,
+        "MimeType": "text/html"
+      }
+    }
+  }
+}
+```
+This example would respond with the contents of `error.html` file with a status code of 200 and a mime type of `text/html` when the request does not have the correct auth code.
