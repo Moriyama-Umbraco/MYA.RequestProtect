@@ -171,15 +171,20 @@ public sealed class RequestProtectMiddleware
         {
             if (setCookie is true)
             {
-                context.Response.Cookies.Append(RequestProtectCookieName, dateTimeProvider.Now.Ticks.ToString(),
-                    new CookieOptions
-                    {
-                        Expires = dateTimeProvider.NowOffSet.AddMinutes(30),
-                        HttpOnly = true,
-                        SameSite = SameSiteMode.Strict,
-                        IsEssential = true,
-                        Secure = true
-                    });
+                var cookieOpts = new CookieOptions
+                {
+                    HttpOnly = true,
+                    SameSite = SameSiteMode.Strict,
+                    IsEssential = true,
+                    Secure = true
+                };
+
+                if (config.Cookie.PersistCookie)
+                {
+                    cookieOpts.Expires = dateTimeProvider.NowOffSet.AddMinutes(config.Cookie.ExpiryMinutes);
+                }
+
+                context.Response.Cookies.Append(RequestProtectCookieName, dateTimeProvider.Now.Ticks.ToString(), cookieOpts);
             }
         }
         else

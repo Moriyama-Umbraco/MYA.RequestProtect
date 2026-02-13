@@ -107,4 +107,5 @@ public class MiddlewareShortCircuitTests
         // Assert
         await Verify(response);
     }
+
 }

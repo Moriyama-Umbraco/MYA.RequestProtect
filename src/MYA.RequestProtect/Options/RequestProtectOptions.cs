@@ -29,4 +29,9 @@ public class RequestProtectOptions
     /// Response configuration for unauthorized requests including response type, destination, and status code
     /// </summary>
     public ResponseOptions Response { get; set; } = new();
+
+    /// <summary>
+    /// Cookie configuration for authentication cookie behavior
+    /// </summary>
+    public CookieSettings Cookie { get; set; } = new();
 }
