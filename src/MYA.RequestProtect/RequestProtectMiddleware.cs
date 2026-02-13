@@ -294,10 +294,14 @@ public sealed class RequestProtectMiddleware
             return true;
         }
 
-        if (config.Rules.Rules?.Length > 0)
+        bool hasRules = config.Rules.Rules is { Length: > 0 };
+        bool hasGroups = config.Rules.RuleGroups is { Length: > 0 };
+
+        if (hasRules || hasGroups)
         {
-            var rulesResults = config.Rules.Rules.Any(r => r.Enabled && DoesRulePass(r, context.Request));
-            return !rulesResults; //If any rules pass the we need to verify the code
+            bool matched = EvaluateRulesAndGroups(
+                config.Rules.Rules, config.Rules.RuleGroups, config.Rules.RulesOperator, context.Request);
+            return !matched; // If matched -> auth IS needed
         }
 
         return false;
@@ -314,6 +318,40 @@ public sealed class RequestProtectMiddleware
         }
 
         return false;
+    }
+
+    private bool EvaluateRulesAndGroups(
+        AuthRule[]? rules, AuthRuleGroup[]? ruleGroups,
+        RuleGroupOperator op, HttpRequest request)
+    {
+        bool hasEnabled = false;
+
+        if (rules is { Length: > 0 })
+        {
+            foreach (var r in rules)
+            {
+                if (!r.Enabled) continue;
+                hasEnabled = true;
+                bool result = DoesRulePass(r, request);
+                if (op == RuleGroupOperator.Any && result) return true;
+                if (op == RuleGroupOperator.All && !result) return false;
+            }
+        }
+
+        if (ruleGroups is { Length: > 0 })
+        {
+            foreach (var g in ruleGroups)
+            {
+                if (!g.Enabled) continue;
+                hasEnabled = true;
+                bool result = EvaluateRulesAndGroups(g.Rules, g.RuleGroups, g.RulesOperator, request);
+                if (op == RuleGroupOperator.Any && result) return true;
+                if (op == RuleGroupOperator.All && !result) return false;
+            }
+        }
+
+        if (!hasEnabled) return false;
+        return op == RuleGroupOperator.All; // All passed
     }
 
     private bool DoesRulePass(AuthRule r, HttpRequest request)

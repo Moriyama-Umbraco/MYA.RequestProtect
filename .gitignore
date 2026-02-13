@@ -494,6 +494,9 @@ $RECYCLE.BIN/
 **/uSync/v9/Content/
 .vscode/
 
+# Claude Code local settings
+.claude/settings.local.json
+
 # Verify files
 *.received.*
 /src/MYA.RequestProtect/appsettings-schema.MYA.RequestProtect.json
