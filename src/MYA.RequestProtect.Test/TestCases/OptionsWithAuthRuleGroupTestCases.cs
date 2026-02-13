@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace MYA.RequestProtect.Tests.TestCases;
 
-public class RequestProtectOptionsWithAuthRuleGroupTestCases : IEnumerable<TheoryDataRow<RequestProtectOptions, string>>
+public class OptionsWithAuthRuleGroupTestCases : IEnumerable<TheoryDataRow<RequestProtectOptions, string>>
 {
     /// <summary>
     /// Test case 1: Simple rule group with ANY operator - allows if any path matches

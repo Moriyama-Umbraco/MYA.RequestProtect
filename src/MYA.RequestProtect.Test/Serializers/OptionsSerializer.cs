@@ -5,7 +5,7 @@ using Xunit.Sdk;
 
 namespace MYA.RequestProtect.Tests.Serializers;
 
-internal class RequestProtectOptionsSerializer : IXunitSerializer
+internal class OptionsSerializer : IXunitSerializer
 {
     public object Deserialize(Type type, string serializedValue)
     {

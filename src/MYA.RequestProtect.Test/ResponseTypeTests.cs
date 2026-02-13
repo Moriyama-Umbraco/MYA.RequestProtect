@@ -10,7 +10,7 @@ public class ResponseTypeTests
     private readonly TestLogger logger = new();
 
     [Theory]
-    [ClassData(typeof(RequestProtectOptionsWithResponseTypeTestCases))]
+    [ClassData(typeof(OptionsWithResponseTypeTestCases))]
     public async Task Auth_ResponseType_Tests(RequestProtectOptions options, string url, string? webRootPath)
     {
         // Arrange

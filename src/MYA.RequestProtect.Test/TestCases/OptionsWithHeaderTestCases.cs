@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace MYA.RequestProtect.Tests.TestCases;
 
-public class RequestProtectOptionsWithHeaderTestCases : IEnumerable<TheoryDataRow<RequestProtectOptions, string>>
+public class OptionsWithHeaderTestCases : IEnumerable<TheoryDataRow<RequestProtectOptions, string>>
 {
     public IEnumerator<TheoryDataRow<RequestProtectOptions, string>> GetEnumerator()
     {

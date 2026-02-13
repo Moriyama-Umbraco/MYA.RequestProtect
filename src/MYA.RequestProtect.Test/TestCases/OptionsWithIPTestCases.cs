@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace MYA.RequestProtect.Tests.TestCases;
 
-public class RequestProtectOptionsWithIPTestCases : IEnumerable<TheoryDataRow<RequestProtectOptions, string>>
+public class OptionsWithIPTestCases : IEnumerable<TheoryDataRow<RequestProtectOptions, string>>
 {
     public IEnumerator<TheoryDataRow<RequestProtectOptions, string>> GetEnumerator()
     {

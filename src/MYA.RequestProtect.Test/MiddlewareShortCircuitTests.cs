@@ -4,7 +4,7 @@ using MYA.RequestProtect.Tests.Setup;
 
 namespace MYA.RequestProtect.Tests;
 
-public class RequestProtectMiddlewareShortCircuitTests
+public class MiddlewareShortCircuitTests
 {
     private readonly TestLogger logger = new();
 

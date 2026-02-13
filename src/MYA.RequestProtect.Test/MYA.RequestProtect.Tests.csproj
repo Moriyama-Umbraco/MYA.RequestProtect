@@ -33,17 +33,4 @@
 	<ItemGroup>
 		<Content Include="wwwroot\**\*" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="RequestProtectMiddlewareTests.QueryString_Rules_queryString=null.verified.txt">
-	    <DependentUpon>RequestProtectMiddlewareTests.cs</DependentUpon>
-	  </None>
-	  <None Update="RequestProtectMiddlewareTests.QueryString_Rules_queryString=-auth=valid_code.verified.txt">
-	    <DependentUpon>RequestProtectMiddlewareTests.cs</DependentUpon>
-	  </None>
-	  <None Update="RequestProtectMiddlewareTests.QueryString_Rules_queryString=-auth=invalid.verified.txt">
-	    <DependentUpon>RequestProtectMiddlewareTests.cs</DependentUpon>
-	  </None>
-	</ItemGroup>
-
 </Project>

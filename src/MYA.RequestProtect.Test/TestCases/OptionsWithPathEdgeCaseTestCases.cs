@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace MYA.RequestProtect.Tests.TestCases;
 
-public class RequestProtectOptionsWithPathEdgeCaseTestCases : IEnumerable<TheoryDataRow<RequestProtectOptions, string>>
+public class OptionsWithPathEdgeCaseTestCases : IEnumerable<TheoryDataRow<RequestProtectOptions, string>>
 {
     private readonly RequestProtectOptions AdminPathRule = new()
     {

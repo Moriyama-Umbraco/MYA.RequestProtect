@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace MYA.RequestProtect.Tests.TestCases;
 
-public class RequestProtectOptionsWithResponseTypeTestCases : IEnumerable<TheoryDataRow<RequestProtectOptions, string, string?>>
+public class OptionsWithResponseTypeTestCases : IEnumerable<TheoryDataRow<RequestProtectOptions, string, string?>>
 {
     private static AuthRules BlockAllRules => new()
     {

@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace MYA.RequestProtect.Tests.TestCases;
 
-public class RequestProtectOptionsWithAppliesToTestCases : IEnumerable<TheoryDataRow<RequestProtectOptions, string>>
+public class OptionsWithAppliesToTestCases : IEnumerable<TheoryDataRow<RequestProtectOptions, string>>
 {
     private readonly RequestProtectOptions QueryOnlyRule = new()
     {
