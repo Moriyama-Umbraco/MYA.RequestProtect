@@ -1,6 +1,7 @@
 using BenchmarkDotNet.Attributes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Hosting;
 using MYA.RequestProtect.Options;
@@ -16,7 +17,6 @@ namespace MYA.RequestProtect.Benchmarks
     public class RequestProtectMiddlewareBenchmark
     {
         private RequestProtectMiddleware _middleware;
-        private HttpContext _context;
         private RequestDelegate _next;
         private IOptionsMonitor<RequestProtectOptions> _optionsMonitor;
 
@@ -24,8 +24,7 @@ namespace MYA.RequestProtect.Benchmarks
         public void Setup()
         {
             _next = (ctx) => Task.CompletedTask;
-            var logger = LoggerFactory.Create(builder => builder.AddConsole())
-      .CreateLogger<RequestProtectMiddleware>();
+            var logger = NullLoggerFactory.Instance.CreateLogger<RequestProtectMiddleware>();
 
             var options = new RequestProtectOptions
             {
@@ -53,31 +52,36 @@ namespace MYA.RequestProtect.Benchmarks
 
             _middleware = new RequestProtectMiddleware(_next, logger, _optionsMonitor,
                 dateTimeProvider, env);
+        }
 
-            _context = new DefaultHttpContext();
-            _context.Request.Path = "/test/path";
-            _context.Connection.RemoteIpAddress = IPAddress.Parse("127.0.0.1");
+        private static HttpContext CreateContext(string remoteIp = "127.0.0.1")
+        {
+            var context = new DefaultHttpContext();
+            context.Request.Path = "/test/path";
+            context.Connection.RemoteIpAddress = IPAddress.Parse(remoteIp);
+            return context;
         }
 
         [Benchmark]
         public Task InvokeAsync_WithIPWhitelist()
         {
-            return _middleware.InvokeAsync(_context);
+            var context = CreateContext();
+            return _middleware.InvokeAsync(context);
         }
 
         [Benchmark]
         public Task InvokeAsync_WithRuleMatch()
         {
-            _context.Connection.RemoteIpAddress = IPAddress.Parse("1.1.1.1"); // Non-whitelisted IP
-            return _middleware.InvokeAsync(_context);
+            var context = CreateContext("1.1.1.1");
+            return _middleware.InvokeAsync(context);
         }
 
         [Benchmark]
         public Task InvokeAsync_WithAuthCode()
         {
-            _context.Connection.RemoteIpAddress = IPAddress.Parse("1.1.1.1");
-            _context.Request.QueryString = new QueryString("?auth=testcode");
-            return _middleware.InvokeAsync(_context);
+            var context = CreateContext("1.1.1.1");
+            context.Request.QueryString = new QueryString("?auth=testcode");
+            return _middleware.InvokeAsync(context);
         }
     }
 

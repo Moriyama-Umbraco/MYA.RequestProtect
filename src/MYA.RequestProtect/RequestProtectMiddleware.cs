@@ -6,7 +6,6 @@ using MYA.RequestProtect.Options;
 using MYA.RequestProtect.Setup;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 
 namespace MYA.RequestProtect;
@@ -19,7 +18,7 @@ public sealed class RequestProtectMiddleware
     private readonly IDatetimeProvider dateTimeProvider;
     private readonly IWebHostEnvironment hostingEnvironment;
     private const string RequestProtectCookieName = "MYAPA";
-    private readonly ConcurrentDictionary<string, Regex> _regexCache;
+    private readonly Dictionary<string, Regex> _regexCache;
     private readonly WhitelistEntry[] _parsedWhitelist;
     private readonly HeaderEntry[] _parsedHeaders;
 
@@ -82,7 +81,7 @@ public sealed class RequestProtectMiddleware
         this.logger = logger;
         this.dateTimeProvider = dateTimeProvider;
         this.hostingEnvironment = hostingEnvironment;
-        _regexCache = new ConcurrentDictionary<string, Regex>();
+        _regexCache = BuildRegexCache(this.config.Rules);
         _parsedWhitelist = ParseWhitelist(this.config.Rules.IpWhitelist);
         _parsedHeaders = ParseHeaders(this.config.Rules.Headers);
     }
@@ -128,6 +127,34 @@ public sealed class RequestProtectMiddleware
         }
 
         return result.ToArray();
+    }
+
+    private static Dictionary<string, Regex> BuildRegexCache(AuthRules rules)
+    {
+        var cache = new Dictionary<string, Regex>(StringComparer.Ordinal);
+        AddPatternsToCache(rules.Rules, cache);
+        AddGroupPatternsToCache(rules.RuleGroups, cache);
+        return cache;
+    }
+
+    private static void AddPatternsToCache(AuthRule[]? rules, Dictionary<string, Regex> cache)
+    {
+        if (rules is not { Length: > 0 }) return;
+        foreach (var r in rules)
+        {
+            if (!string.IsNullOrEmpty(r.Pattern))
+                cache.TryAdd(r.Pattern, new Regex(r.Pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant));
+        }
+    }
+
+    private static void AddGroupPatternsToCache(AuthRuleGroup[]? groups, Dictionary<string, Regex> cache)
+    {
+        if (groups is not { Length: > 0 }) return;
+        foreach (var g in groups)
+        {
+            AddPatternsToCache(g.Rules, cache);
+            AddGroupPatternsToCache(g.RuleGroups, cache);
+        }
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -371,9 +398,10 @@ public sealed class RequestProtectMiddleware
 
     private bool DoesRulePass(AuthRule r, HttpRequest request)
     {
-        var url = request.GetDisplayUrl();
-        var regex = _regexCache.GetOrAdd(r.Pattern, pattern =>
-            new Regex(pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant));
+        if (!_regexCache.TryGetValue(r.Pattern, out var regex))
+        {
+            regex = new Regex(r.Pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        }
 
         var value = r.AppliesTo switch
         {
@@ -387,11 +415,13 @@ public sealed class RequestProtectMiddleware
 
         if (ruleResult)
         {
-            logger.LogRuleValidation(r, url);
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogRuleValidation(r, request.GetDisplayUrl());
         }
         else
         {
-            logger.LogRuleValidationFailed(r, url);
+            if (logger.IsEnabled(LogLevel.Warning))
+                logger.LogRuleValidationFailed(r, request.GetDisplayUrl());
         }
 
         return ruleResult;
