@@ -7,7 +7,7 @@ public class CookieSettings
     /// <summary>
     /// Cookie expiry duration in minutes (default: 30)
     /// </summary>
-    [Range(1, int.MaxValue)]
+    [Range(1, 525_600)]
     public int ExpiryMinutes { get; set; } = 30;
 
     /// <summary>

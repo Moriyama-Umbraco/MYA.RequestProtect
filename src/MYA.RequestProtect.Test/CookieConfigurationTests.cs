@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using MYA.RequestProtect.Options;
 using MYA.RequestProtect.Tests.Setup;
 
@@ -25,6 +26,35 @@ public class CookieConfigurationTests
             ]
         }
     };
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(525_601)]
+    public void ExpiryMinutes_InvalidValues_FailsValidation(int expiryMinutes)
+    {
+        var options = BlockingOptions;
+        options.Cookie.ExpiryMinutes = expiryMinutes;
+
+        Assert.Throws<OptionsValidationException>(
+            () => Host.CreateTestServer(logger, options));
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(525_600)]
+    public async Task ExpiryMinutes_BoundaryValues_PassesValidation(int expiryMinutes)
+    {
+        var options = BlockingOptions;
+        options.Cookie.ExpiryMinutes = expiryMinutes;
+
+        using var server = Host.CreateTestServer(logger, options);
+        var client = server.CreateClient();
+
+        var response = await client.GetAsync("/blog/post?auth=valid_code", TestContext.Current.CancellationToken);
+
+        Assert.True(response.IsSuccessStatusCode);
+    }
 
     [Fact]
     public async Task ValidAuth_SetsCookie_WithCustomExpiry()
