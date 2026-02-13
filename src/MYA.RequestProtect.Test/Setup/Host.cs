@@ -21,10 +21,18 @@ internal static class Host
     public static TestServer CreateTestServer(
         ILogger logger,
         RequestProtectOptions? options = null,
-        Uri? baseAddress = null)
+        Uri? baseAddress = null,
+        string? webRootPath = null)
     {
-        var factory = new WebHostBuilder()
-            .UseTestServer()
+        var builder = new WebHostBuilder()
+            .UseTestServer();
+
+        if (webRootPath is not null)
+        {
+            builder.UseWebRoot(webRootPath);
+        }
+
+        var factory = builder
             .ConfigureAppConfiguration((context, config) =>
             {
                 if (options is not null)

@@ -31,6 +31,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Content Include="wwwroot\**\*" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <None Update="RequestProtectMiddlewareTests.QueryString_Rules_queryString=null.verified.txt">
 	    <DependentUpon>RequestProtectMiddlewareTests.cs</DependentUpon>
 	  </None>

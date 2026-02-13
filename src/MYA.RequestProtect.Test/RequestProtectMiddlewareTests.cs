@@ -45,8 +45,6 @@ public class RequestProtectMiddlewareTests
         // Act
         var response = await client.GetAsync($"/{queryString}", TestContext.Current.CancellationToken);
         
-        logger.WasLogMethodCalled(nameof(RequestProtectMiddlewareLogs.LogRuleValidation));
-
         // Assert
         await Verify(response);
     }
@@ -111,6 +109,38 @@ public class RequestProtectMiddlewareTests
     [Theory()]
     [ClassData(typeof(RequestProtectOptionsWithAuthRuleGroupTestCases))]
     public async Task Auth_RuleGroup_Tests(RequestProtectOptions options, string url)
+    {
+        // Arrange
+        using var server = Host.CreateTestServer(logger, options);
+        var client = server.CreateClient();
+
+        // Act
+        var response = await client.GetAsync(url, TestContext.Current.CancellationToken);
+
+        // Assert
+        await Verify(response)
+            .UseFileName(TestContext.Current.Test.FileSafeTestName());
+    }
+
+    [Theory()]
+    [ClassData(typeof(RequestProtectOptionsWithAppliesToTestCases))]
+    public async Task Auth_AppliesTo_Tests(RequestProtectOptions options, string url)
+    {
+        // Arrange
+        using var server = Host.CreateTestServer(logger, options);
+        var client = server.CreateClient();
+
+        // Act
+        var response = await client.GetAsync(url, TestContext.Current.CancellationToken);
+
+        // Assert
+        await Verify(response)
+            .UseFileName(TestContext.Current.Test.FileSafeTestName());
+    }
+
+    [Theory()]
+    [ClassData(typeof(RequestProtectOptionsWithPathEdgeCaseTestCases))]
+    public async Task Auth_PathEdgeCase_Tests(RequestProtectOptions options, string url)
     {
         // Arrange
         using var server = Host.CreateTestServer(logger, options);

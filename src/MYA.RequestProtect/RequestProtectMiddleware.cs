@@ -229,6 +229,21 @@ public sealed class RequestProtectMiddleware
             return;
         }
 
+        // Validate: absolute URIs must be http/https, relative URIs must start with /
+        if (targetUri.IsAbsoluteUri)
+        {
+            if (targetUri.Scheme != Uri.UriSchemeHttp && targetUri.Scheme != Uri.UriSchemeHttps)
+            {
+                await DefaultResponse(context);
+                return;
+            }
+        }
+        else if (config.Response.Destination is not null && !config.Response.Destination.StartsWith('/'))
+        {
+            await DefaultResponse(context);
+            return;
+        }
+
         var currentUri = new Uri($"{context.Request.Scheme}://{context.Request.Host}{context.Request.Path}");
 
         if (!targetUri.IsAbsoluteUri)
