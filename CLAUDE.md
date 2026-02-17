@@ -22,7 +22,7 @@ dotnet test src/MYA.RequestProtect.Test/MYA.RequestProtect.Tests.csproj
 dotnet test src/MYA.RequestProtect.Test/MYA.RequestProtect.Tests.csproj --filter "FullyQualifiedName~TestMethodName"
 
 # Run benchmarks (Release mode required)
-dotnet run --project src/BenchmarkSuite1/BenchmarkSuite1.csproj -c Release
+dotnet run --project src/MYA.RequestProtect.Benchmarks/MYA.RequestProtect.Benchmarks.csproj -c Release
 ```
 
 Note: Building the core library auto-generates `appsettings-schema.MYA.RequestProtect.json` via the `MYA.RequestProtect.ScehmaGenerator` project (runs on net8.0 target only).
@@ -65,7 +65,7 @@ The middleware pre-parses whitelist IPs and headers into struct arrays (`Whiteli
 | `MYA.RequestProtect.Umbraco` | Umbraco CMS integration |
 | `MYA.RequestProtect.Umbraco.Bellissima` | Umbraco Bellissima backoffice integration |
 | `MYA.RequestProtect.ScehmaGenerator` | JSON schema generator (runs at build time) |
-| `BenchmarkSuite1` | BenchmarkDotNet performance suite |
+| `MYA.RequestProtect.Benchmarks` | BenchmarkDotNet performance suite |
 
 ### Test Infrastructure
 

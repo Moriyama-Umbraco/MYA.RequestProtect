@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Options;
 using MYA.RequestProtect.Enums;
 using MYA.RequestProtect.Logging;
+using MYA.RequestProtect.Models;
 using MYA.RequestProtect.Options;
 using MYA.RequestProtect.Setup;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Runtime.CompilerServices;
+using System.Collections.Frozen;
+using System.Runtime.InteropServices;
 
 namespace MYA.RequestProtect;
 
@@ -18,57 +20,9 @@ public sealed class RequestProtectMiddleware
     private readonly IDatetimeProvider dateTimeProvider;
     private readonly IWebHostEnvironment hostingEnvironment;
     private const string RequestProtectCookieName = "MYAPA";
-    private readonly Dictionary<string, Regex> _regexCache;
-    private readonly WhitelistEntry[] _parsedWhitelist;
-    private readonly HeaderEntry[] _parsedHeaders;
-
-    private readonly struct WhitelistEntry
-    {
-        public readonly bool IsCidr;
-        public readonly IPNetwork? Network;
-        public readonly IPAddress? DirectIp;
-        public readonly string Pattern;
-
-        public WhitelistEntry(string pattern, bool isCidr, IPNetwork? network, IPAddress? directIp)
-        {
-            Pattern = pattern;
-            IsCidr = isCidr;
-            Network = network;
-            DirectIp = directIp;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Matches(IPAddress ip) => IsCidr
-            ? Network?.Contains(ip) == true
-       : DirectIp?.Equals(ip) == true;
-    }
-
-    private readonly struct HeaderEntry
-    {
-        public readonly string Name;
-        public readonly string? Value;
-        public readonly bool IsWildcard;
-
-        public HeaderEntry(string name, string? value)
-        {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            Value = value;
-            IsWildcard = value == "*";
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Matches(IHeaderDictionary headers)
-        {
-            if (!headers.TryGetValue(Name, out var headerValue))
-                return false;
-
-            if (IsWildcard)
-                return true;
-
-            return !string.IsNullOrEmpty(Value) &&
-                 headerValue.ToString().Equals(Value, StringComparison.Ordinal);
-        }
-    }
+    private readonly FrozenDictionary<string, Regex> _regexCache;
+    private readonly List<WhitelistEntry> _parsedWhitelist;
+    private readonly List<HeaderEntry> _parsedHeaders;
 
     public RequestProtectMiddleware(RequestDelegate next,
         ILogger<RequestProtectMiddleware> logger,
@@ -86,26 +40,26 @@ public sealed class RequestProtectMiddleware
         _parsedHeaders = ParseHeaders(this.config.Rules.Headers);
     }
 
-    private static HeaderEntry[] ParseHeaders(HeaderDetail[]? headers)
+    private static List<HeaderEntry> ParseHeaders(HeaderDetail[]? headers)
     {
         if (headers == null || headers.Length == 0)
-            return Array.Empty<HeaderEntry>();
+            return [];
 
-        var result = new HeaderEntry[headers.Length];
+        var result = new List<HeaderEntry>(headers.Length);
         for (var i = 0; i < headers.Length; i++)
         {
             if (string.IsNullOrEmpty(headers[i].Header))
                 continue;
 
-            result[i] = new HeaderEntry(headers[i].Header, headers[i].Value);
+            result.Add(new HeaderEntry(headers[i].Header, headers[i].Value));
         }
         return result;
     }
 
-    private static WhitelistEntry[] ParseWhitelist(string[]? whitelist)
+    private static List<WhitelistEntry> ParseWhitelist(string[]? whitelist)
     {
         if (whitelist == null || whitelist.Length == 0)
-            return Array.Empty<WhitelistEntry>();
+            return [];
 
         var result = new List<WhitelistEntry>(whitelist.Length);
 
@@ -126,15 +80,15 @@ public sealed class RequestProtectMiddleware
             }
         }
 
-        return result.ToArray();
+        return result;
     }
 
-    private static Dictionary<string, Regex> BuildRegexCache(AuthRules rules)
+    private static FrozenDictionary<string, Regex> BuildRegexCache(AuthRules rules)
     {
         var cache = new Dictionary<string, Regex>(StringComparer.Ordinal);
         AddPatternsToCache(rules.Rules, cache);
         AddGroupPatternsToCache(rules.RuleGroups, cache);
-        return cache;
+        return cache.ToFrozenDictionary(StringComparer.Ordinal);
     }
 
     private static void AddPatternsToCache(AuthRule[]? rules, Dictionary<string, Regex> cache)
@@ -358,7 +312,7 @@ public sealed class RequestProtectMiddleware
     {
         if (remoteIp is null) return false;
 
-        foreach (ref readonly var entry in _parsedWhitelist.AsSpan())
+        foreach (ref readonly var entry in CollectionsMarshal.AsSpan(_parsedWhitelist))
         {
             logger.LogDebug("Checking IP whitelist entry: {ip} against remote IP: {remoteIp}", entry.Pattern, remoteIp);
             if (entry.Matches(remoteIp)) return true;
@@ -437,9 +391,9 @@ public sealed class RequestProtectMiddleware
 
     private bool HeadersAuthorised(HttpContext context)
     {
-        if (_parsedHeaders.Length == 0) return false;
+        if (_parsedHeaders.Count == 0) return false;
 
-        foreach (ref readonly var header in _parsedHeaders.AsSpan())
+        foreach (ref readonly var header in CollectionsMarshal.AsSpan(_parsedHeaders))
         {
             if (header.Matches(context.Request.Headers)) return true;
         }

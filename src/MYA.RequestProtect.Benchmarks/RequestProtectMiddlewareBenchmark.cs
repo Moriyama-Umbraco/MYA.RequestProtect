@@ -1,4 +1,5 @@
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -6,19 +7,19 @@ using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Hosting;
 using MYA.RequestProtect.Options;
 using MYA.RequestProtect.Setup;
-using System;
 using System.Net;
-using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
 
 namespace MYA.RequestProtect.Benchmarks
 {
     [MemoryDiagnoser]
+    [SimpleJob(RuntimeMoniker.Net80)]
+    [SimpleJob(RuntimeMoniker.Net90)]
     public class RequestProtectMiddlewareBenchmark
     {
-        private RequestProtectMiddleware _middleware;
-        private RequestDelegate _next;
-        private IOptionsMonitor<RequestProtectOptions> _optionsMonitor;
+        private RequestProtectMiddleware _middleware = null!;
+        private RequestDelegate _next = null!;
+        private IOptionsMonitor<RequestProtectOptions> _optionsMonitor = null!;
 
         [GlobalSetup]
         public void Setup()
@@ -33,16 +34,16 @@ namespace MYA.RequestProtect.Benchmarks
                 QueryKey = "auth",
                 Rules = new AuthRules
                 {
-                    IpWhitelist = new[] { "127.0.0.1", "192.168.1.0/24" },
-                    Rules = new[]
-                    {
+                    IpWhitelist = ["127.0.0.1", "192.168.1.0/24"],
+                    Rules =
+                    [
                         new AuthRule
                         {
                             Name = "Test Rule",
                             Pattern = @"^/test/.*$",
                             Enabled = true
                         }
-                    }
+                    ]
                 }
             };
 
@@ -54,7 +55,7 @@ namespace MYA.RequestProtect.Benchmarks
                 dateTimeProvider, env);
         }
 
-        private static HttpContext CreateContext(string remoteIp = "127.0.0.1")
+        private static DefaultHttpContext CreateContext(string remoteIp = "127.0.0.1")
         {
             var context = new DefaultHttpContext();
             context.Request.Path = "/test/path";

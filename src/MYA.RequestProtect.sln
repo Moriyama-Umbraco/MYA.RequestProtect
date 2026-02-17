@@ -22,7 +22,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MYA.RequestProtect.UmbracoT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MYA.RequestProtect.ScehmaGenerator", "MYA.RequestProtect.ScehmaGenerator\MYA.RequestProtect.ScehmaGenerator.csproj", "{25E98A7E-A5F7-478F-B6CC-346138010FFD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BenchmarkSuite1", "BenchmarkSuite1\BenchmarkSuite1.csproj", "{A20861A9-411E-6150-BF5C-69E8196E5D22}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MYA.RequestProtect.Benchmarks", "MYA.RequestProtect.Benchmarks\MYA.RequestProtect.Benchmarks.csproj", "{A20861A9-411E-6150-BF5C-69E8196E5D22}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Sites", "Test Sites", "{BD85EA1B-2DAD-402D-B6B9-5512C5CDC8C8}"
 EndProject

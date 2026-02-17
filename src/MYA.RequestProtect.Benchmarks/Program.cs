@@ -1,6 +1,6 @@
 using BenchmarkDotNet.Running;
 
-namespace BenchmarkSuite1
+namespace MYA.RequestProtect.Benchmarks
 {
     internal class Program
     {
