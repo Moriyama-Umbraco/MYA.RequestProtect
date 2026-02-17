@@ -60,12 +60,13 @@ app.UseMiddleware<RequestProtectMiddleware>();
       "QueryKey": "auth",
       "Code": "your_secret_code",
       "Rules": {
-        "IPWhitelist": ["127.0.0.1", "::1"],
+        "IpWhitelist": ["127.0.0.1", "::1"],
         "Rules": [
           {
-            "Pattern": "/api/*",
+            "Name": "Protect API",
+            "Pattern": "^/api/",
             "AppliesTo": "Path",
-            "RequiresQueryString": true
+            "Enabled": true
           }
         ]
       }
@@ -81,15 +82,20 @@ app.UseMiddleware<RequestProtectMiddleware>();
 | `Enabled` | Enable/disable the middleware | `false` |
 | `QueryKey` | The query string parameter name for authentication | `"auth"` |
 | `Code` | The secret code that must be provided in the query string | Required |
-| `Rules` | Collection of authentication rules | Empty collection |
+| `Rules` | Authentication rules configuration (see below) | Empty |
+| `Response` | Response configuration for unauthorized requests (see below) | 400 status |
+| `Cookie` | Cookie configuration for auth cookie behavior (see below) | 30-min persistent |
 
 ### Authentication Rules
 
 Each rule in the `Rules` collection can specify:
 
-- `Pattern`: URL pattern to match (supports wildcards)
-- `AppliesTo`: What part of the request to match against (`Path`, `Host`, etc.)
-- `RequiresQueryString`: Whether the rule requires query string authentication
+- `Name`: A name for the rule (required)
+- `Pattern`: Regex pattern to match against the request (required)
+- `AppliesTo`: What part of the request to match against — `PathAndQuery` (default), `Path`, `Host`, or `Query`
+- `Enabled`: Whether the rule is active
+
+Rules use **inverted logic**: if any enabled rule matches the request, authentication **is** required. If no rules match, the request passes through unprotected.
 
 ### Protecting API Routes
 
@@ -104,9 +110,10 @@ Each rule in the `Rules` collection can specify:
       "Rules": {
         "Rules": [
           {
-            "Pattern": "/api/*",
+            "Name": "Protect API",
+            "Pattern": "^/api/",
             "AppliesTo": "Path",
-            "RequiresQueryString": true
+            "Enabled": true
           }
         ]
       }
@@ -161,6 +168,101 @@ In some situations (Azure for example) IP White listing can be excessive, this f
   }
 }
 ```
+
+### Rule Groups
+
+Rules can be organised into hierarchical groups with `All` or `Any` operators to create complex matching logic:
+
+```json
+{
+  "MYA":
+  {
+    "RP": {
+      "Enabled": true,
+      "Code": "secret123",
+      "Rules": {
+        "RulesOperator": "Any",
+        "RuleGroups": [
+          {
+            "Name": "Staging Protection",
+            "Enabled": true,
+            "RulesOperator": "All",
+            "Rules": [
+              {
+                "Name": "Staging Host",
+                "Pattern": "^staging\\.",
+                "AppliesTo": "Host",
+                "Enabled": true
+              },
+              {
+                "Name": "Admin Path",
+                "Pattern": "^/admin/",
+                "AppliesTo": "Path",
+                "Enabled": true
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+This configuration requires authentication only when **both** the host starts with `staging.` **and** the path starts with `/admin/`. Rule groups support recursive nesting via the `RuleGroups` property.
+
+### Response Options
+
+Control what happens when a request fails authentication:
+
+```json
+{
+  "MYA":
+  {
+    "RP": {
+      "Enabled": true,
+      "Code": "secret123",
+      "Response": {
+        "ResponseType": "Redirect",
+        "Destination": "https://example.com/unauthorized",
+        "StatusCode": 302
+      }
+    }
+  }
+}
+```
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `ResponseType` | `Default` (status code only), `StaticFile`, or `Redirect` | `Default` |
+| `Destination` | File path for StaticFile or URL for Redirect | — |
+| `StatusCode` | HTTP status code returned | `400` |
+| `MimeType` | Content type for StaticFile responses | `"text/html"` |
+
+### Cookie Settings
+
+Configure the authentication cookie that is set after successful validation:
+
+```json
+{
+  "MYA":
+  {
+    "RP": {
+      "Enabled": true,
+      "Code": "secret123",
+      "Cookie": {
+        "ExpiryMinutes": 60,
+        "PersistCookie": true
+      }
+    }
+  }
+}
+```
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `ExpiryMinutes` | Cookie expiry duration in minutes (1–525,600) | `30` |
+| `PersistCookie` | When `true`, sets an explicit expiry (survives browser restart). When `false`, creates a session cookie (deleted on browser close). | `true` |
 
 ### Further Examples
 

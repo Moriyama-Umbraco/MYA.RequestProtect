@@ -1,0 +1,25 @@
+﻿{
+  Version: 1.1,
+  Content: {
+    Headers: [
+      {
+        Content-Type: [
+          text/html
+        ]
+      }
+    ]
+  },
+  StatusCode: OK,
+  ReasonPhrase: OK,
+  Headers: [],
+  TrailingHeaders: [],
+  RequestMessage: {
+    Version: 1.1,
+    Method: {
+      Method: GET
+    },
+    RequestUri: https://localhost/admin/page,
+    Headers: []
+  },
+  IsSuccessStatusCode: true
+}

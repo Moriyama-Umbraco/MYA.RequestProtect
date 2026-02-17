@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace MYA.RequestProtect.Tests.TestCases;
 
-public class RequestProtectOptionsWithRegexTestCases : IEnumerable<TheoryDataRow<RequestProtectOptions, string>>
+public class OptionsWithRegexTestCases : IEnumerable<TheoryDataRow<RequestProtectOptions, string>>
 {
     private readonly RequestProtectOptions SingleAuthRuleTest = new()
     {

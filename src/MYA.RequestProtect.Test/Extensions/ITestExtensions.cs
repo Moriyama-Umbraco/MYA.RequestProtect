@@ -8,8 +8,20 @@ internal static class ITestExtensions
     {
         var displayName = test?.TestDisplayName ?? "";
         var parenIndex = displayName.IndexOf('(');
-        return parenIndex >= 0
+        var testName = parenIndex >= 0
             ? displayName[..parenIndex]
             : displayName;
+
+        var className = test?.TestCase?.TestMethod?.TestClass?.TestClassName;
+        if (className is not null)
+        {
+            var lastDot = className.LastIndexOf('.');
+            if (lastDot >= 0)
+                className = className[(lastDot + 1)..];
+
+            return $"{className}.{testName}";
+        }
+
+        return testName;
     }
 }

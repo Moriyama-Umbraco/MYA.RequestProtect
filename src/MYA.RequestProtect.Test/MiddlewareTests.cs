@@ -6,7 +6,7 @@ using MYA.RequestProtect.Tests.TestCases;
 
 namespace MYA.RequestProtect.Tests;
 
-public class RequestProtectMiddlewareTests
+public class MiddlewareTests
 {
 
     private readonly TestLogger logger = new();
@@ -45,14 +45,12 @@ public class RequestProtectMiddlewareTests
         // Act
         var response = await client.GetAsync($"/{queryString}", TestContext.Current.CancellationToken);
         
-        logger.WasLogMethodCalled(nameof(RequestProtectMiddlewareLogs.LogRuleValidation));
-
         // Assert
         await Verify(response);
     }
 
     [Theory()]
-    [ClassData(typeof(RequestProtectOptionsWithRegexTestCases))]
+    [ClassData(typeof(OptionsWithRegexTestCases))]
     public async Task Auth_RegexRule_Tests(RequestProtectOptions options, string url)
     {
         // Arrange
@@ -71,7 +69,7 @@ public class RequestProtectMiddlewareTests
     }
 
     [Theory()]
-    [ClassData(typeof(RequestProtectOptionsWithIPTestCases))]
+    [ClassData(typeof(OptionsWithIPTestCases))]
     public async Task Auth_IPRule_Tests(RequestProtectOptions options, string url)
     {
         // Arrange
@@ -90,7 +88,7 @@ public class RequestProtectMiddlewareTests
     }
 
     [Theory()]
-    [ClassData(typeof(RequestProtectOptionsWithHeaderTestCases))]
+    [ClassData(typeof(OptionsWithHeaderTestCases))]
     public async Task Auth_HeaderRule_Tests(RequestProtectOptions options, string url)
     {
         // Arrange
@@ -102,6 +100,54 @@ public class RequestProtectMiddlewareTests
 
 
 
+
+        // Assert
+        await Verify(response)
+            .UseFileName(TestContext.Current.Test.FileSafeTestName());
+    }
+
+    [Theory()]
+    [ClassData(typeof(OptionsWithAuthRuleGroupTestCases))]
+    public async Task Auth_RuleGroup_Tests(RequestProtectOptions options, string url)
+    {
+        // Arrange
+        using var server = Host.CreateTestServer(logger, options);
+        var client = server.CreateClient();
+
+        // Act
+        var response = await client.GetAsync(url, TestContext.Current.CancellationToken);
+
+        // Assert
+        await Verify(response)
+            .UseFileName(TestContext.Current.Test.FileSafeTestName());
+    }
+
+    [Theory()]
+    [ClassData(typeof(OptionsWithAppliesToTestCases))]
+    public async Task Auth_AppliesTo_Tests(RequestProtectOptions options, string url)
+    {
+        // Arrange
+        using var server = Host.CreateTestServer(logger, options);
+        var client = server.CreateClient();
+
+        // Act
+        var response = await client.GetAsync(url, TestContext.Current.CancellationToken);
+
+        // Assert
+        await Verify(response)
+            .UseFileName(TestContext.Current.Test.FileSafeTestName());
+    }
+
+    [Theory()]
+    [ClassData(typeof(OptionsWithPathEdgeCaseTestCases))]
+    public async Task Auth_PathEdgeCase_Tests(RequestProtectOptions options, string url)
+    {
+        // Arrange
+        using var server = Host.CreateTestServer(logger, options);
+        var client = server.CreateClient();
+
+        // Act
+        var response = await client.GetAsync(url, TestContext.Current.CancellationToken);
 
         // Assert
         await Verify(response)

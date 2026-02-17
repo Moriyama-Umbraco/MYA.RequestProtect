@@ -1,0 +1,25 @@
+﻿{
+  Version: 1.1,
+  Content: {
+    Headers: []
+  },
+  StatusCode: OK,
+  ReasonPhrase: OK,
+  Headers: [
+    {
+      Set-Cookie: [
+        MYAPA=638851536000000000; path=/; secure; samesite=strict; httponly
+      ]
+    }
+  ],
+  TrailingHeaders: [],
+  RequestMessage: {
+    Version: 1.1,
+    Method: {
+      Method: GET
+    },
+    RequestUri: https://localhost/blog/post?auth=valid_code,
+    Headers: []
+  },
+  IsSuccessStatusCode: true
+}

@@ -1,7 +1,8 @@
+using System.ComponentModel.DataAnnotations;
 
 namespace MYA.RequestProtect.Options;
 
-public class RequestProtectOptions
+public class RequestProtectOptions : IValidatableObject
 {
     public const string Key = "MYA:RP";
 
@@ -29,4 +30,16 @@ public class RequestProtectOptions
     /// Response configuration for unauthorized requests including response type, destination, and status code
     /// </summary>
     public ResponseOptions Response { get; set; } = new();
+
+    /// <summary>
+    /// Cookie configuration for authentication cookie behavior
+    /// </summary>
+    public CookieSettings Cookie { get; set; } = new();
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        var results = new List<ValidationResult>();
+        Validator.TryValidateObject(Cookie, new ValidationContext(Cookie), results, validateAllProperties: true);
+        return results;
+    }
 }

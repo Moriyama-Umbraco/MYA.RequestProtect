@@ -21,4 +21,14 @@ public class AuthRules
     /// Collection of custom authentication rules with regex patterns
     /// </summary>
     public AuthRule[]? Rules { get; set; } = [];
+
+    /// <summary>
+    /// Collection of rule groups for hierarchical rule evaluation
+    /// </summary>
+    public AuthRuleGroup[]? RuleGroups { get; set; }
+
+    /// <summary>
+    /// Logical operator for combining top-level rules and rule groups (default: Any preserves existing behaviour)
+    /// </summary>
+    public RuleGroupOperator RulesOperator { get; set; } = RuleGroupOperator.Any;
 }

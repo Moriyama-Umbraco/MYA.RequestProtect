@@ -26,18 +26,19 @@ dotnet add package Moriyama.RequestProtect.Umbraco
 ```json
 {
   "MYA":
-  {  
+  {
     "RP": {
       "Enabled": true,
       "QueryKey": "auth",
       "Code": "your_secret_code",
       "Rules": {
-        "IPWhitelist": ["127.0.0.1"],
+        "IpWhitelist": ["127.0.0.1"],
         "Rules": [
           {
-            "Pattern": "/preview/*",
+            "Name": "Protect Preview",
+            "Pattern": "^/preview/",
             "AppliesTo": "Path",
-            "RequiresQueryString": true
+            "Enabled": true
           }
         ]
       }
@@ -63,9 +64,10 @@ dotnet add package Moriyama.RequestProtect.Umbraco
       "Rules": {
         "Rules": [
           {
-            "Pattern": "/preview/*",
+            "Name": "Protect Preview",
+            "Pattern": "^/preview/",
             "AppliesTo": "Path",
-            "RequiresQueryString": true
+            "Enabled": true
           }
         ]
       }
@@ -79,18 +81,21 @@ dotnet add package Moriyama.RequestProtect.Umbraco
 ```json
 {
   "MYA":
-  { 
+  {
     "RP": {
       "Enabled": true,
+      "Code": "your_secret_code",
       "Rules": {
-        "IPWhitelist": [
+        "IpWhitelist": [
           "office.ip.address",
           "vpn.ip.address"
         ],
         "Rules": [
           {
+            "Name": "Staging Host",
             "Pattern": "^staging\\.website\\.com$",
-            "AppliesTo": "Host"
+            "AppliesTo": "Host",
+            "Enabled": true
           }
         ]
       }
@@ -103,16 +108,19 @@ dotnet add package Moriyama.RequestProtect.Umbraco
 
 ```json
 {
-  "MYA": 
+  "MYA":
   {
     "RP": {
       "Enabled": true,
+      "Code": "your_secret_code",
       "Rules": {
-        "IPWhitelist": ["office.ip.range.*"],
+        "IpWhitelist": ["office.ip.range.*"],
         "Rules": [
           {
-            "Pattern": "/umbraco/*",
-            "AppliesTo": "Path"
+            "Name": "Protect Backoffice",
+            "Pattern": "^/umbraco/",
+            "AppliesTo": "Path",
+            "Enabled": true
           }
         ]
       }
