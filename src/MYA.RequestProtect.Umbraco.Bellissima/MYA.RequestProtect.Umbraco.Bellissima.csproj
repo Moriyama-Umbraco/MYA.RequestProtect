@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <StaticWebAssetBasePath>/</StaticWebAssetBasePath>
@@ -15,9 +15,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
-		<Version>16.1.0</Version>
-		<AssemblyVersion>16.1.0.0</AssemblyVersion>
-		<FileVersion>16.1.0.0</FileVersion>
+		<Version>17.0.0</Version>
+		<AssemblyVersion>17.0.0.0</AssemblyVersion>
+		<FileVersion>17.0.0.0</FileVersion>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Copyright>Copyright © Moriyama Limited $([System.DateTime]::Now.Year)</Copyright>
@@ -38,10 +38,10 @@
 	</ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Umbraco.Cms.Web.Website" Version="16.0.0" />
-    <PackageReference Include="Umbraco.Cms.Web.Common" Version="16.0.0" />
-    <PackageReference Include="Umbraco.Cms.Api.Common" Version="16.0.0" />
-    <PackageReference Include="Umbraco.Cms.Api.Management" Version="16.0.0" />
+    <PackageReference Include="Umbraco.Cms.Web.Website" Version="17.0.0" />
+    <PackageReference Include="Umbraco.Cms.Web.Common" Version="17.0.0" />
+    <PackageReference Include="Umbraco.Cms.Api.Common" Version="17.0.0" />
+    <PackageReference Include="Umbraco.Cms.Api.Management" Version="17.0.0" />
   </ItemGroup>
 
   <ItemGroup>
