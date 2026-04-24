@@ -70,10 +70,10 @@ public class MiddlewareTests
 
     [Theory()]
     [ClassData(typeof(OptionsWithIPTestCases))]
-    public async Task Auth_IPRule_Tests(RequestProtectOptions options, string url)
+    public async Task Auth_IPRule_Tests(RequestProtectOptions options, string url, string? requestIp = null)
     {
         // Arrange
-        using var server = Host.CreateTestServer(logger, options);
+        using var server = Host.CreateTestServer(logger, options, remoteIp: requestIp);
         var client = server.CreateClient();
 
         // Act

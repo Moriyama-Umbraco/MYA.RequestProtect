@@ -16,13 +16,13 @@ namespace MYA.RequestProtect.Tests.Setup;
 
 internal static class Host
 {
-    public static string RemoteIP = "203.0.113.42";
+    public const string DefaultRemoteIP = "203.0.113.42";
 
     public static TestServer CreateTestServer(
         ILogger logger,
         RequestProtectOptions? options = null,
         Uri? baseAddress = null,
-        string? webRootPath = null)
+        string? webRootPath = null, string? remoteIp = null)
     {
         var builder = new WebHostBuilder()
             .UseTestServer();
@@ -66,7 +66,7 @@ internal static class Host
 
                 app.Use(async (context, next) =>
                 {
-                    context.Connection.RemoteIpAddress = IPAddress.Parse(RemoteIP);
+                    context.Connection.RemoteIpAddress = IPAddress.Parse(string.IsNullOrWhiteSpace(remoteIp) ? DefaultRemoteIP : remoteIp);
                     context.Request.Headers["singleHeader"] = "singleHeader";
                     context.Request.Headers["wildHeader"] = "wildHeader";
                     context.Request.Headers["headerTwo"] = "2";
