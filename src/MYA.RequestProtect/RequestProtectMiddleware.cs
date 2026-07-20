@@ -285,7 +285,7 @@ public sealed class RequestProtectMiddleware
 
     private bool AuthNotNeeded(HttpContext context)
     {
-        if (config.Rules.IpWhitelist is not null && config.Rules.IpWhitelist.Length > 0 && IsIpAllowed(context.Connection.RemoteIpAddress))
+        if (config.Rules.IpWhitelist is not null && config.Rules.IpWhitelist.Length > 0 && IsIpAllowed(ResolveClientIp(context)))
         {
             return true;
         }
@@ -306,6 +306,41 @@ public sealed class RequestProtectMiddleware
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Resolves the client IP address, preferring a configured forwarded header (e.g. Cloudflare's
+    /// "cf-connecting-ip") when <see cref="ForwardedIpSettings.Enabled"/> is set, and falling back to the
+    /// transport connection IP otherwise. The header is only trusted when explicitly enabled to prevent
+    /// clients spoofing it to bypass the IP whitelist.
+    /// </summary>
+    private IPAddress? ResolveClientIp(HttpContext context)
+    {
+        var forwarded = config.ForwardedIp;
+
+        if (forwarded is { Enabled: true } && !string.IsNullOrWhiteSpace(forwarded.HeaderName)
+            && context.Request.Headers.TryGetValue(forwarded.HeaderName, out var headerValues))
+        {
+            var raw = headerValues.ToString();
+            if (!string.IsNullOrWhiteSpace(raw))
+            {
+                // cf-connecting-ip carries a single IP; X-Forwarded-For style headers carry a comma
+                // separated list where the originating client is the first entry.
+                var commaIndex = raw.IndexOf(',', StringComparison.Ordinal);
+                var candidate = commaIndex >= 0 ? raw.AsSpan(0, commaIndex) : raw.AsSpan();
+                candidate = candidate.Trim();
+
+                if (IPAddress.TryParse(candidate, out var forwardedIp))
+                {
+                    logger.LogDebug("Resolved client IP {ip} from forwarded header {header}", forwardedIp, forwarded.HeaderName);
+                    return forwardedIp;
+                }
+
+                logger.LogWarning("Forwarded header {header} present but could not be parsed as an IP address", forwarded.HeaderName);
+            }
+        }
+
+        return context.Connection.RemoteIpAddress;
     }
 
     private bool IsIpAllowed(IPAddress? remoteIp)

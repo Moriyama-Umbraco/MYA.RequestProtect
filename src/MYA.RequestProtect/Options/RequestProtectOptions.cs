@@ -36,6 +36,11 @@ public class RequestProtectOptions : IValidatableObject
     /// </summary>
     public CookieSettings Cookie { get; set; } = new();
 
+    /// <summary>
+    /// Configuration for resolving the client IP from a forwarded header when hosted behind a trusted proxy
+    /// </summary>
+    public ForwardedIpSettings ForwardedIp { get; set; } = new();
+
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         var results = new List<ValidationResult>();

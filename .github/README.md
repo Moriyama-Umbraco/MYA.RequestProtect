@@ -85,6 +85,7 @@ app.UseMiddleware<RequestProtectMiddleware>();
 | `Rules` | Authentication rules configuration (see below) | Empty |
 | `Response` | Response configuration for unauthorized requests (see below) | 400 status |
 | `Cookie` | Cookie configuration for auth cookie behavior (see below) | 30-min persistent |
+| `ForwardedIp` | Resolve the client IP from a forwarded header when behind a trusted proxy (see below) | Disabled |
 
 ### Authentication Rules
 
@@ -141,6 +142,39 @@ This configuration will require query string authentication for all routes start
 ```
 
 This configuration will only allow requests from the specified IP addresses.
+
+### Client IP Behind a Reverse Proxy / CDN
+
+By default the client IP is read from the transport connection (`RemoteIpAddress`). When your app is hosted behind a reverse proxy or CDN — for example **Cloudflare** or **Umbraco Cloud** — that connection IP is the *proxy's* address, not the visitor's, so IP whitelisting will never match the real client.
+
+Enable `ForwardedIp` to read the originating client IP from a proxy header instead, falling back to the connection IP when the header is absent or unparseable:
+
+```json
+{
+  "MYA":
+  {
+    "RP": {
+      "Enabled": true,
+      "ForwardedIp": {
+        "Enabled": true,
+        "HeaderName": "cf-connecting-ip"
+      },
+      "Rules": {
+        "IpWhitelist": ["192.168.1.100", "10.0.0.0/24"]
+      }
+    }
+  }
+}
+```
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `Enabled` | When `true`, read the client IP from `HeaderName` before falling back to the connection IP | `false` |
+| `HeaderName` | Header carrying the originating client IP. If it holds a comma-separated list, the first entry is used | `"cf-connecting-ip"` |
+
+`HeaderName` is generic, so other providers work too — e.g. `"X-Azure-ClientIP"` for Azure Front Door.
+
+> ⚠️ **Security:** Only enable `ForwardedIp` when your application is guaranteed to receive traffic **exclusively** through the named trusted proxy. Request headers are client-controlled, so if traffic can reach the origin directly, a client could spoof the header to appear as a whitelisted IP and bypass protection. This is why the feature is opt-in and off by default. For the same reason, prefer a proxy-set header such as `cf-connecting-ip` over the client-appendable `X-Forwarded-For`.
 
 ### Header Authorisation
 
