@@ -89,10 +89,11 @@ public class MiddlewareTests
 
     [Theory()]
     [ClassData(typeof(OptionsWithForwardedIpTestCases))]
-    public async Task Auth_ForwardedIp_Tests(RequestProtectOptions options, string url, string? forwardedHeaderName, string? forwardedHeaderValue)
+    public async Task Auth_ForwardedIp_Tests(RequestProtectOptions options, string url, string? forwardedHeaderName, string? forwardedHeaderValue, string? host)
     {
         // Arrange
-        using var server = Host.CreateTestServer(logger, options, forwardedHeaderName: forwardedHeaderName, forwardedHeaderValue: forwardedHeaderValue);
+        var baseAddress = string.IsNullOrWhiteSpace(host) ? null : new Uri($"https://{host}");
+        using var server = Host.CreateTestServer(logger, options, baseAddress: baseAddress, forwardedHeaderName: forwardedHeaderName, forwardedHeaderValue: forwardedHeaderValue);
         var client = server.CreateClient();
 
         // Act

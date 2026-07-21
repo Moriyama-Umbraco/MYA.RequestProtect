@@ -157,7 +157,8 @@ Enable `ForwardedIp` to read the originating client IP from a proxy header inste
       "Enabled": true,
       "ForwardedIp": {
         "Enabled": true,
-        "HeaderName": "cf-connecting-ip"
+        "HeaderName": "cf-connecting-ip",
+        "TrustedHosts": ["www.example.com"]
       },
       "Rules": {
         "IpWhitelist": ["192.168.1.100", "10.0.0.0/24"]
@@ -171,10 +172,13 @@ Enable `ForwardedIp` to read the originating client IP from a proxy header inste
 |--------|-------------|---------|
 | `Enabled` | When `true`, read the client IP from `HeaderName` before falling back to the connection IP | `false` |
 | `HeaderName` | Header carrying the originating client IP. If it holds a comma-separated list, the first entry is used | `"cf-connecting-ip"` |
+| `TrustedHosts` | Optional hostnames (case-insensitive, exact match, no port) the header is trusted for. When empty, the header is trusted on all hosts | Empty (all hosts) |
 
 `HeaderName` is generic, so other providers work too — e.g. `"X-Azure-ClientIP"` for Azure Front Door.
 
 > ⚠️ **Security:** Only enable `ForwardedIp` when your application is guaranteed to receive traffic **exclusively** through the named trusted proxy. Request headers are client-controlled, so if traffic can reach the origin directly, a client could spoof the header to appear as a whitelisted IP and bypass protection. This is why the feature is opt-in and off by default. For the same reason, prefer a proxy-set header such as `cf-connecting-ip` over the client-appendable `X-Forwarded-For`.
+>
+> **Umbraco Cloud (and similar):** your site is reachable both via the proxied custom domain **and** the raw project domain (e.g. `myproject.umbraco.io`), which is **not** fronted by Cloudflare. Without scoping, a request to the raw domain could carry a spoofed `cf-connecting-ip` and bypass the whitelist. Set `TrustedHosts` to your custom domain(s) so the header is honoured only there and ignored on the raw domain.
 
 ### Header Authorisation
 

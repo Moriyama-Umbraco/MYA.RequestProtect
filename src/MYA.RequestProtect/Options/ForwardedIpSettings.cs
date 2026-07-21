@@ -22,4 +22,13 @@ public class ForwardedIpSettings
     /// "X-Azure-ClientIP"). If the header carries a comma-separated list, the first entry is used.
     /// </summary>
     public string HeaderName { get; set; } = "cf-connecting-ip";
+
+    /// <summary>
+    /// Optional list of hostnames the forwarded header is trusted for (case-insensitive, exact match on the
+    /// request host without port). Use this where the application is reachable both via a proxied custom
+    /// domain and a non-proxied raw domain (e.g. Umbraco Cloud's *.umbraco.io) so the header is trusted only
+    /// on the proxied custom domain and ignored on the raw domain, where it could be spoofed. When null or
+    /// empty, the header is trusted on all hosts.
+    /// </summary>
+    public string[]? TrustedHosts { get; set; }
 }
