@@ -285,7 +285,7 @@ public sealed class RequestProtectMiddleware
 
     private bool AuthNotNeeded(HttpContext context)
     {
-        if (config.Rules.IpWhitelist is not null && config.Rules.IpWhitelist.Length > 0 && IsIpAllowed(context.Connection.RemoteIpAddress))
+        if (config.Rules.IpWhitelist is not null && config.Rules.IpWhitelist.Length > 0 && IsIpAllowed(ResolveClientIp(context)))
         {
             return true;
         }
@@ -303,6 +303,72 @@ public sealed class RequestProtectMiddleware
             bool matched = EvaluateRulesAndGroups(
                 config.Rules.Rules, config.Rules.RuleGroups, config.Rules.RulesOperator, context.Request);
             return !matched; // If matched -> auth IS needed
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Resolves the client IP address, preferring a configured forwarded header (e.g. Cloudflare's
+    /// "cf-connecting-ip") when <see cref="ForwardedIpSettings.Enabled"/> is set, and falling back to the
+    /// transport connection IP otherwise. The header is only trusted when explicitly enabled and, when
+    /// <see cref="ForwardedIpSettings.TrustedHosts"/> is configured, only for those hosts. This prevents
+    /// clients spoofing it (e.g. via a non-proxied raw domain) to bypass the IP whitelist.
+    /// </summary>
+    private IPAddress? ResolveClientIp(HttpContext context)
+    {
+        var forwarded = config.ForwardedIp;
+
+        if (forwarded is { Enabled: true } && !string.IsNullOrWhiteSpace(forwarded.HeaderName))
+        {
+            if (!IsTrustedHost(context.Request.Host, forwarded.TrustedHosts))
+            {
+                logger.LogDebug("Forwarded header {header} ignored for untrusted host {host}", forwarded.HeaderName, context.Request.Host.Host);
+            }
+            else if (context.Request.Headers.TryGetValue(forwarded.HeaderName, out var headerValues))
+            {
+                var raw = headerValues.ToString();
+                if (!string.IsNullOrWhiteSpace(raw))
+                {
+                    // cf-connecting-ip carries a single IP; X-Forwarded-For style headers carry a comma
+                    // separated list where the originating client is the first entry.
+                    var commaIndex = raw.IndexOf(',', StringComparison.Ordinal);
+                    var candidate = commaIndex >= 0 ? raw.AsSpan(0, commaIndex) : raw.AsSpan();
+                    candidate = candidate.Trim();
+
+                    if (IPAddress.TryParse(candidate, out var forwardedIp))
+                    {
+                        logger.LogDebug("Resolved client IP {ip} from forwarded header {header}", forwardedIp, forwarded.HeaderName);
+                        return forwardedIp;
+                    }
+
+                    logger.LogWarning("Forwarded header {header} present but could not be parsed as an IP address", forwarded.HeaderName);
+                }
+            }
+        }
+
+        return context.Connection.RemoteIpAddress;
+    }
+
+    /// <summary>
+    /// Determines whether the forwarded header should be trusted for the request host. When no trusted hosts
+    /// are configured the header is trusted on all hosts; otherwise only on a case-insensitive exact match of
+    /// the request host (without port).
+    /// </summary>
+    private static bool IsTrustedHost(HostString host, string[]? trustedHosts)
+    {
+        if (trustedHosts is not { Length: > 0 }) return true;
+
+        var requestHost = host.Host;
+        if (string.IsNullOrEmpty(requestHost)) return false;
+
+        foreach (var trusted in trustedHosts)
+        {
+            if (!string.IsNullOrWhiteSpace(trusted)
+                && string.Equals(trusted.Trim(), requestHost, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
         }
 
         return false;

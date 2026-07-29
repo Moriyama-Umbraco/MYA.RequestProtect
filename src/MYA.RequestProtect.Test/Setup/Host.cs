@@ -22,7 +22,8 @@ internal static class Host
         ILogger logger,
         RequestProtectOptions? options = null,
         Uri? baseAddress = null,
-        string? webRootPath = null, string? remoteIp = null)
+        string? webRootPath = null, string? remoteIp = null,
+        string? forwardedHeaderName = null, string? forwardedHeaderValue = null)
     {
         var builder = new WebHostBuilder()
             .UseTestServer();
@@ -67,6 +68,12 @@ internal static class Host
                 app.Use(async (context, next) =>
                 {
                     context.Connection.RemoteIpAddress = IPAddress.Parse(string.IsNullOrWhiteSpace(remoteIp) ? DefaultRemoteIP : remoteIp);
+
+                    if (!string.IsNullOrWhiteSpace(forwardedHeaderName) && forwardedHeaderValue is not null)
+                    {
+                        context.Request.Headers[forwardedHeaderName] = forwardedHeaderValue;
+                    }
+
                     context.Request.Headers["singleHeader"] = "singleHeader";
                     context.Request.Headers["wildHeader"] = "wildHeader";
                     context.Request.Headers["headerTwo"] = "2";

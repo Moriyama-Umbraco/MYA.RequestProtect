@@ -88,6 +88,23 @@ public class MiddlewareTests
     }
 
     [Theory()]
+    [ClassData(typeof(OptionsWithForwardedIpTestCases))]
+    public async Task Auth_ForwardedIp_Tests(RequestProtectOptions options, string url, string? forwardedHeaderName, string? forwardedHeaderValue, string? host)
+    {
+        // Arrange
+        var baseAddress = string.IsNullOrWhiteSpace(host) ? null : new Uri($"https://{host}");
+        using var server = Host.CreateTestServer(logger, options, baseAddress: baseAddress, forwardedHeaderName: forwardedHeaderName, forwardedHeaderValue: forwardedHeaderValue);
+        var client = server.CreateClient();
+
+        // Act
+        var response = await client.GetAsync(url, TestContext.Current.CancellationToken);
+
+        // Assert
+        await Verify(response)
+            .UseFileName(TestContext.Current.Test.FileSafeTestName());
+    }
+
+    [Theory()]
     [ClassData(typeof(OptionsWithHeaderTestCases))]
     public async Task Auth_HeaderRule_Tests(RequestProtectOptions options, string url)
     {
