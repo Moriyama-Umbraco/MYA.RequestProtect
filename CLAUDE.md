@@ -51,6 +51,7 @@ Rules use **inverted logic**: if any enabled rule matches the request, auth **is
 Options bind to the `MYA:RP` configuration section via `RequestProtectOptions`. Key nested types:
 - `AuthRules` - contains `IpWhitelist` (string[]), `Headers` (HeaderDetail[]), `Rules` (AuthRule[]), `RuleGroups` (AuthRuleGroup[]), `RulesOperator` (RuleGroupOperator)
 - `ResponseOptions` - controls unauthorized response behavior (Default 400, Redirect, or StaticFile with MimeType)
+- `CookieSettings` - controls the `MYAPA` auth cookie's `ExpiryMinutes`, whether it `PersistCookie` (persistent vs. session cookie), and optional `SlidingExpiration` (refreshes the cookie's expiry on every request from an already-authenticated client; no effect when `PersistCookie` is false)
 
 ### Performance
 
