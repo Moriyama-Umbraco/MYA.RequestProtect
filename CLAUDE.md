@@ -54,7 +54,11 @@ Options bind to the `MYA:RP` configuration section via `RequestProtectOptions`. 
 
 ### Performance
 
-The middleware pre-parses whitelist IPs and headers into struct arrays (`WhitelistEntry`, `HeaderEntry`) in the constructor. Regex patterns are cached in a `ConcurrentDictionary<string, Regex>`. Hot paths use `AggressiveInlining` and `Span`-based iteration.
+The middleware pre-parses whitelist IPs and headers into struct arrays (`WhitelistEntry`, `HeaderEntry`) and compiles regex patterns into a `FrozenDictionary<string, Regex>`. These, along with the bound options, are held in a single `CompiledConfig` snapshot swapped atomically via a `volatile` field whenever `IOptionsMonitor<RequestProtectOptions>` reports a config change (see Live Config Reload below) — not rebuilt per request. Hot paths use `AggressiveInlining` and `Span`-based iteration.
+
+### Live Config Reload
+
+`RequestProtectMiddleware` takes `IOptionsMonitor<RequestProtectOptions>` and re-compiles its `CompiledConfig` snapshot on every `OnChange` notification, so edits to `appsettings.json` (file reload) or environment variables take effect without an app restart. A config edit that fails to compile (e.g. an invalid regex `Pattern`) is logged and the previous good snapshot is kept rather than thrown from the reload callback. Each `config.X` read within a request reflects the latest snapshot at read time — not a snapshot fixed for the whole request — matching plain `IOptionsMonitor.CurrentValue` semantics. `MYA.RequestProtect.Umbraco.Bellissima`'s admin API controller also reads `IOptionsMonitor<RequestProtectOptions>.CurrentValue` per request so its display of enabled state, the auth query string, and current rules stays in sync with a live reload.
 
 ### Projects
 

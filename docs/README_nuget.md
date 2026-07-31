@@ -11,6 +11,7 @@ A flexible and powerful ASP.NET Core middleware for protecting web requests thro
 - 🎯 URL pattern matching rules
 - 🍪 Automatic cookie-based authentication after successful validation
 - ⚙️ Highly configurable through appsettings.json
+- 🔄 Live config reload — changes to appsettings.json or environment variables take effect without an app restart
 - 📝 Comprehensive logging support
 
 ## Quick Start
@@ -46,6 +47,10 @@ app.UseMiddleware<RequestProtectMiddleware>();
   }
 }
 ```
+
+## Live Config Reload
+
+Config is bound via `IOptionsMonitor<RequestProtectOptions>`, so editing `appsettings.json` (or an environment variable, if your host reloads config from it) takes effect immediately — no restart required. If an edit produces invalid config (e.g. a bad regex `Pattern`), the error is logged and the middleware keeps running with its last valid configuration.
 
 ## Documentation
 
