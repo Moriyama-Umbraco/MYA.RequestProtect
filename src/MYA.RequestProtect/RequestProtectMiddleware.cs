@@ -14,15 +14,31 @@ namespace MYA.RequestProtect;
 
 public sealed class RequestProtectMiddleware
 {
-    private readonly RequestProtectOptions config;
+    private volatile CompiledConfig _compiled;
+
+    private RequestProtectOptions config => _compiled.Options;
+
+    private sealed class CompiledConfig
+    {
+        public required RequestProtectOptions Options { get; init; }
+        public required FrozenDictionary<string, Regex> RegexCache { get; init; }
+        public required List<WhitelistEntry> Whitelist { get; init; }
+        public required List<HeaderEntry> Headers { get; init; }
+    }
+
+    private static CompiledConfig Compile(RequestProtectOptions options) => new()
+    {
+        Options = options,
+        RegexCache = BuildRegexCache(options.Rules),
+        Whitelist = ParseWhitelist(options.Rules.IpWhitelist),
+        Headers = ParseHeaders(options.Rules.Headers)
+    };
+
     private readonly RequestDelegate _next;
     private readonly ILogger logger;
     private readonly IDatetimeProvider dateTimeProvider;
     private readonly IWebHostEnvironment hostingEnvironment;
     private const string RequestProtectCookieName = "MYAPA";
-    private readonly FrozenDictionary<string, Regex> _regexCache;
-    private readonly List<WhitelistEntry> _parsedWhitelist;
-    private readonly List<HeaderEntry> _parsedHeaders;
 
     public RequestProtectMiddleware(RequestDelegate next,
         ILogger<RequestProtectMiddleware> logger,
@@ -30,14 +46,12 @@ public sealed class RequestProtectMiddleware
         IDatetimeProvider dateTimeProvider,
     IWebHostEnvironment hostingEnvironment)
     {
-        this.config = config.CurrentValue;
         _next = next;
         this.logger = logger;
         this.dateTimeProvider = dateTimeProvider;
         this.hostingEnvironment = hostingEnvironment;
-        _regexCache = BuildRegexCache(this.config.Rules);
-        _parsedWhitelist = ParseWhitelist(this.config.Rules.IpWhitelist);
-        _parsedHeaders = ParseHeaders(this.config.Rules.Headers);
+        _compiled = Compile(config.CurrentValue);
+        config.OnChange(newOptions => _compiled = Compile(newOptions));
     }
 
     private static List<HeaderEntry> ParseHeaders(HeaderDetail[]? headers)
@@ -378,7 +392,8 @@ public sealed class RequestProtectMiddleware
     {
         if (remoteIp is null) return false;
 
-        foreach (ref readonly var entry in CollectionsMarshal.AsSpan(_parsedWhitelist))
+        var whitelist = _compiled.Whitelist;
+        foreach (ref readonly var entry in CollectionsMarshal.AsSpan(whitelist))
         {
             logger.LogDebug("Checking IP whitelist entry: {ip} against remote IP: {remoteIp}", entry.Pattern, remoteIp);
             if (entry.Matches(remoteIp)) return true;
@@ -423,7 +438,7 @@ public sealed class RequestProtectMiddleware
 
     private bool DoesRulePass(AuthRule r, HttpRequest request)
     {
-        if (!_regexCache.TryGetValue(r.Pattern, out var regex))
+        if (!_compiled.RegexCache.TryGetValue(r.Pattern, out var regex))
         {
             regex = new Regex(r.Pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
         }
@@ -457,9 +472,10 @@ public sealed class RequestProtectMiddleware
 
     private bool HeadersAuthorised(HttpContext context)
     {
-        if (_parsedHeaders.Count == 0) return false;
+        var headers = _compiled.Headers;
+        if (headers.Count == 0) return false;
 
-        foreach (ref readonly var header in CollectionsMarshal.AsSpan(_parsedHeaders))
+        foreach (ref readonly var header in CollectionsMarshal.AsSpan(headers))
         {
             if (header.Matches(context.Request.Headers)) return true;
         }
