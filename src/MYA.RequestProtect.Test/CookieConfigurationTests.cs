@@ -1,3 +1,4 @@
+using System.Linq;
 using Microsoft.Extensions.Options;
 using MYA.RequestProtect.Options;
 using MYA.RequestProtect.Tests.Setup;
@@ -106,5 +107,71 @@ public class CookieConfigurationTests
 
         // Assert
         await Verify(response);
+    }
+
+    [Fact]
+    public async Task SlidingExpiration_Enabled_RefreshesCookieOnEachRequest()
+    {
+        // Arrange
+        var options = BlockingOptions;
+        options.Cookie.SlidingExpiration = true;
+        options.Cookie.PersistCookie = true;
+
+        using var server = Host.CreateTestServer(logger, options);
+        var client = server.CreateClient();
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "/admin/secret");
+        request.Headers.Add("Cookie", "MYAPA=somevalue");
+
+        // Act
+        var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.True(response.Headers.Contains("Set-Cookie"));
+        var setCookie = response.Headers.GetValues("Set-Cookie").Single();
+        Assert.Contains("MYAPA=somevalue", setCookie);
+        Assert.Contains("expires=", setCookie, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task SlidingExpiration_Disabled_DoesNotRefreshCookie()
+    {
+        // Arrange
+        var options = BlockingOptions;
+        options.Cookie.SlidingExpiration = false;
+        options.Cookie.PersistCookie = true;
+
+        using var server = Host.CreateTestServer(logger, options);
+        var client = server.CreateClient();
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "/admin/secret");
+        request.Headers.Add("Cookie", "MYAPA=somevalue");
+
+        // Act
+        var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.False(response.Headers.Contains("Set-Cookie"));
+    }
+
+    [Fact]
+    public async Task SlidingExpiration_Enabled_WithSessionCookie_DoesNotRefreshCookie()
+    {
+        // Arrange
+        var options = BlockingOptions;
+        options.Cookie.SlidingExpiration = true;
+        options.Cookie.PersistCookie = false;
+
+        using var server = Host.CreateTestServer(logger, options);
+        var client = server.CreateClient();
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "/admin/secret");
+        request.Headers.Add("Cookie", "MYAPA=somevalue");
+
+        // Act
+        var response = await client.SendAsync(request, TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.False(response.Headers.Contains("Set-Cookie"));
     }
 }
