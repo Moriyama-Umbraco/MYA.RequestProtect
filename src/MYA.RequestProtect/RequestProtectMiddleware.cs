@@ -137,8 +137,19 @@ public sealed class RequestProtectMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        if (!config.Enabled || HasMiddlewareAuthCookie(context.Request))
+        if (!config.Enabled)
         {
+            await _next(context);
+            return;
+        }
+
+        if (HasMiddlewareAuthCookie(context.Request, out var existingCookieValue))
+        {
+            if (config.Cookie.SlidingExpiration && config.Cookie.PersistCookie)
+            {
+                SetAuthCookie(context, existingCookieValue);
+            }
+
             await _next(context);
             return;
         }
@@ -149,20 +160,7 @@ public sealed class RequestProtectMiddleware
         {
             if (setCookie is true)
             {
-                var cookieOpts = new CookieOptions
-                {
-                    HttpOnly = true,
-                    SameSite = SameSiteMode.Strict,
-                    IsEssential = true,
-                    Secure = true
-                };
-
-                if (config.Cookie.PersistCookie)
-                {
-                    cookieOpts.Expires = dateTimeProvider.NowOffSet.AddMinutes(config.Cookie.ExpiryMinutes);
-                }
-
-                context.Response.Cookies.Append(RequestProtectCookieName, dateTimeProvider.Now.Ticks.ToString(), cookieOpts);
+                SetAuthCookie(context, dateTimeProvider.Now.Ticks.ToString());
             }
         }
         else
@@ -172,6 +170,24 @@ public sealed class RequestProtectMiddleware
         }
 
         await _next(context);
+    }
+
+    private void SetAuthCookie(HttpContext context, string value)
+    {
+        var cookieOpts = new CookieOptions
+        {
+            HttpOnly = true,
+            SameSite = SameSiteMode.Strict,
+            IsEssential = true,
+            Secure = true
+        };
+
+        if (config.Cookie.PersistCookie)
+        {
+            cookieOpts.Expires = dateTimeProvider.NowOffSet.AddMinutes(config.Cookie.ExpiryMinutes);
+        }
+
+        context.Response.Cookies.Append(RequestProtectCookieName, value, cookieOpts);
     }
 
     private async Task HandleUnAuthorisedRequest(HttpContext context)
@@ -478,8 +494,12 @@ public sealed class RequestProtectMiddleware
         return ruleResult;
     }
 
-    private static bool HasMiddlewareAuthCookie(HttpRequest request)
-        => request.Cookies.TryGetValue(RequestProtectCookieName, out var cookieVal) && !string.IsNullOrWhiteSpace(cookieVal);
+    private static bool HasMiddlewareAuthCookie(HttpRequest request, out string cookieValue)
+    {
+        var found = request.Cookies.TryGetValue(RequestProtectCookieName, out var cookieVal) && !string.IsNullOrWhiteSpace(cookieVal);
+        cookieValue = found ? cookieVal! : string.Empty;
+        return found;
+    }
 
     private bool HeadersAuthorised(HttpContext context)
     {
