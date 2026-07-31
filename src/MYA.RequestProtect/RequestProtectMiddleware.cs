@@ -14,15 +14,31 @@ namespace MYA.RequestProtect;
 
 public sealed class RequestProtectMiddleware
 {
-    private readonly RequestProtectOptions config;
+    private volatile CompiledConfig _compiled;
+
+    private RequestProtectOptions config => _compiled.Options;
+
+    private sealed class CompiledConfig
+    {
+        public required RequestProtectOptions Options { get; init; }
+        public required FrozenDictionary<string, Regex> RegexCache { get; init; }
+        public required List<WhitelistEntry> Whitelist { get; init; }
+        public required List<HeaderEntry> Headers { get; init; }
+    }
+
+    private static CompiledConfig Compile(RequestProtectOptions options) => new()
+    {
+        Options = options,
+        RegexCache = BuildRegexCache(options.Rules),
+        Whitelist = ParseWhitelist(options.Rules.IpWhitelist),
+        Headers = ParseHeaders(options.Rules.Headers)
+    };
+
     private readonly RequestDelegate _next;
     private readonly ILogger logger;
     private readonly IDatetimeProvider dateTimeProvider;
     private readonly IWebHostEnvironment hostingEnvironment;
     private const string RequestProtectCookieName = "MYAPA";
-    private readonly FrozenDictionary<string, Regex> _regexCache;
-    private readonly List<WhitelistEntry> _parsedWhitelist;
-    private readonly List<HeaderEntry> _parsedHeaders;
 
     public RequestProtectMiddleware(RequestDelegate next,
         ILogger<RequestProtectMiddleware> logger,
@@ -30,14 +46,22 @@ public sealed class RequestProtectMiddleware
         IDatetimeProvider dateTimeProvider,
     IWebHostEnvironment hostingEnvironment)
     {
-        this.config = config.CurrentValue;
         _next = next;
         this.logger = logger;
         this.dateTimeProvider = dateTimeProvider;
         this.hostingEnvironment = hostingEnvironment;
-        _regexCache = BuildRegexCache(this.config.Rules);
-        _parsedWhitelist = ParseWhitelist(this.config.Rules.IpWhitelist);
-        _parsedHeaders = ParseHeaders(this.config.Rules.Headers);
+        _compiled = Compile(config.CurrentValue);
+        config.OnChange(newOptions =>
+        {
+            try
+            {
+                _compiled = Compile(newOptions);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to compile reloaded RequestProtect configuration; keeping previous configuration");
+            }
+        });
     }
 
     private static List<HeaderEntry> ParseHeaders(HeaderDetail[]? headers)
@@ -113,8 +137,19 @@ public sealed class RequestProtectMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        if (!config.Enabled || HasMiddlewareAuthCookie(context.Request))
+        if (!config.Enabled)
         {
+            await _next(context);
+            return;
+        }
+
+        if (HasMiddlewareAuthCookie(context.Request, out var existingCookieValue))
+        {
+            if (config.Cookie.SlidingExpiration && config.Cookie.PersistCookie)
+            {
+                SetAuthCookie(context, existingCookieValue);
+            }
+
             await _next(context);
             return;
         }
@@ -125,20 +160,7 @@ public sealed class RequestProtectMiddleware
         {
             if (setCookie is true)
             {
-                var cookieOpts = new CookieOptions
-                {
-                    HttpOnly = true,
-                    SameSite = SameSiteMode.Strict,
-                    IsEssential = true,
-                    Secure = true
-                };
-
-                if (config.Cookie.PersistCookie)
-                {
-                    cookieOpts.Expires = dateTimeProvider.NowOffSet.AddMinutes(config.Cookie.ExpiryMinutes);
-                }
-
-                context.Response.Cookies.Append(RequestProtectCookieName, dateTimeProvider.Now.Ticks.ToString(), cookieOpts);
+                SetAuthCookie(context, dateTimeProvider.Now.Ticks.ToString());
             }
         }
         else
@@ -148,6 +170,24 @@ public sealed class RequestProtectMiddleware
         }
 
         await _next(context);
+    }
+
+    private void SetAuthCookie(HttpContext context, string value)
+    {
+        var cookieOpts = new CookieOptions
+        {
+            HttpOnly = true,
+            SameSite = SameSiteMode.Strict,
+            IsEssential = true,
+            Secure = true
+        };
+
+        if (config.Cookie.PersistCookie)
+        {
+            cookieOpts.Expires = dateTimeProvider.NowOffSet.AddMinutes(config.Cookie.ExpiryMinutes);
+        }
+
+        context.Response.Cookies.Append(RequestProtectCookieName, value, cookieOpts);
     }
 
     private async Task HandleUnAuthorisedRequest(HttpContext context)
@@ -285,7 +325,9 @@ public sealed class RequestProtectMiddleware
 
     private bool AuthNotNeeded(HttpContext context)
     {
-        if (config.Rules.IpWhitelist is not null && config.Rules.IpWhitelist.Length > 0 && IsIpAllowed(ResolveClientIp(context)))
+        var snapshot = _compiled;
+
+        if (snapshot.Options.Rules.IpWhitelist is not null && snapshot.Options.Rules.IpWhitelist.Length > 0 && IsIpAllowed(snapshot.Whitelist, ResolveClientIp(context)))
         {
             return true;
         }
@@ -295,13 +337,13 @@ public sealed class RequestProtectMiddleware
             return true;
         }
 
-        bool hasRules = config.Rules.Rules is { Length: > 0 };
-        bool hasGroups = config.Rules.RuleGroups is { Length: > 0 };
+        bool hasRules = snapshot.Options.Rules.Rules is { Length: > 0 };
+        bool hasGroups = snapshot.Options.Rules.RuleGroups is { Length: > 0 };
 
         if (hasRules || hasGroups)
         {
             bool matched = EvaluateRulesAndGroups(
-                config.Rules.Rules, config.Rules.RuleGroups, config.Rules.RulesOperator, context.Request);
+                snapshot.Options.Rules.Rules, snapshot.Options.Rules.RuleGroups, snapshot.Options.Rules.RulesOperator, context.Request);
             return !matched; // If matched -> auth IS needed
         }
 
@@ -374,11 +416,11 @@ public sealed class RequestProtectMiddleware
         return false;
     }
 
-    private bool IsIpAllowed(IPAddress? remoteIp)
+    private bool IsIpAllowed(List<WhitelistEntry> whitelist, IPAddress? remoteIp)
     {
         if (remoteIp is null) return false;
 
-        foreach (ref readonly var entry in CollectionsMarshal.AsSpan(_parsedWhitelist))
+        foreach (ref readonly var entry in CollectionsMarshal.AsSpan(whitelist))
         {
             logger.LogDebug("Checking IP whitelist entry: {ip} against remote IP: {remoteIp}", entry.Pattern, remoteIp);
             if (entry.Matches(remoteIp)) return true;
@@ -423,7 +465,7 @@ public sealed class RequestProtectMiddleware
 
     private bool DoesRulePass(AuthRule r, HttpRequest request)
     {
-        if (!_regexCache.TryGetValue(r.Pattern, out var regex))
+        if (!_compiled.RegexCache.TryGetValue(r.Pattern, out var regex))
         {
             regex = new Regex(r.Pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
         }
@@ -452,14 +494,19 @@ public sealed class RequestProtectMiddleware
         return ruleResult;
     }
 
-    private static bool HasMiddlewareAuthCookie(HttpRequest request)
-        => request.Cookies.TryGetValue(RequestProtectCookieName, out var cookieVal) && !string.IsNullOrWhiteSpace(cookieVal);
+    private static bool HasMiddlewareAuthCookie(HttpRequest request, out string cookieValue)
+    {
+        var found = request.Cookies.TryGetValue(RequestProtectCookieName, out var cookieVal) && !string.IsNullOrWhiteSpace(cookieVal);
+        cookieValue = found ? cookieVal! : string.Empty;
+        return found;
+    }
 
     private bool HeadersAuthorised(HttpContext context)
     {
-        if (_parsedHeaders.Count == 0) return false;
+        var headers = _compiled.Headers;
+        if (headers.Count == 0) return false;
 
-        foreach (ref readonly var header in CollectionsMarshal.AsSpan(_parsedHeaders))
+        foreach (ref readonly var header in CollectionsMarshal.AsSpan(headers))
         {
             if (header.Matches(context.Request.Headers)) return true;
         }

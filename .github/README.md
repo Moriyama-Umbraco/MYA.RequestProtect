@@ -290,7 +290,8 @@ Configure the authentication cookie that is set after successful validation:
       "Code": "secret123",
       "Cookie": {
         "ExpiryMinutes": 60,
-        "PersistCookie": true
+        "PersistCookie": true,
+        "SlidingExpiration": true
       }
     }
   }
@@ -301,6 +302,7 @@ Configure the authentication cookie that is set after successful validation:
 |--------|-------------|---------|
 | `ExpiryMinutes` | Cookie expiry duration in minutes (1–525,600) | `30` |
 | `PersistCookie` | When `true`, sets an explicit expiry (survives browser restart). When `false`, creates a session cookie (deleted on browser close). | `true` |
+| `SlidingExpiration` | When `true` (and `PersistCookie` is also `true`), resets the cookie's expiry to `now + ExpiryMinutes` on every request from an already-authenticated client, so an actively-browsing user is never logged out mid-session. No effect when `PersistCookie` is `false`. Note: this sets a `Set-Cookie` header on every authenticated response, which prevents response/output caching and CDN caching for that traffic. | `false` |
 
 ### Further Examples
 

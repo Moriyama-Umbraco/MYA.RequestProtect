@@ -11,6 +11,7 @@ A flexible and powerful ASP.NET Core middleware for protecting web requests thro
 - 🎯 URL pattern matching rules
 - 🍪 Automatic cookie-based authentication after successful validation
 - ⚙️ Highly configurable through appsettings.json
+- 🔄 Live config reload — changes to appsettings.json or environment variables take effect without an app restart
 - 📝 Comprehensive logging support
 
 ## Quick Start
@@ -46,6 +47,29 @@ app.UseMiddleware<RequestProtectMiddleware>();
   }
 }
 ```
+
+## Cookie Options
+
+```json
+{
+  "MYA:RP": {
+    "Enabled": true,
+    "QueryKey": "auth",
+    "Code": "your_secret_code",
+    "Cookie": {
+      "ExpiryMinutes": 30,
+      "PersistCookie": true,
+      "SlidingExpiration": true
+    }
+  }
+}
+```
+
+With `SlidingExpiration: true`, an already-authenticated visitor's cookie expiry resets to `now + ExpiryMinutes` on every request, so an actively-browsing user is never logged out mid-session. Has no effect when `PersistCookie` is `false` (session cookies have no server-tracked expiry to extend). Note: this sets a `Set-Cookie` header on every authenticated response, which prevents response/output caching and CDN caching for that traffic.
+
+## Live Config Reload
+
+Config is bound via `IOptionsMonitor<RequestProtectOptions>`, so editing `appsettings.json` (or an environment variable, if your host reloads config from it) takes effect immediately — no restart required. If an edit produces invalid config (e.g. a bad regex `Pattern`), the error is logged and the middleware keeps running with its last valid configuration.
 
 ## Documentation
 

@@ -15,4 +15,12 @@ public class CookieSettings
     /// When false, creates a session cookie (deleted on browser close).
     /// </summary>
     public bool PersistCookie { get; set; } = true;
+
+    /// <summary>
+    /// When true, and PersistCookie is also true, the auth cookie's expiry is reset to
+    /// now + ExpiryMinutes on every request that carries a valid cookie, keeping an
+    /// actively-browsing user authenticated indefinitely. No effect when PersistCookie
+    /// is false (session cookies carry no server-tracked expiry to extend).
+    /// </summary>
+    public bool SlidingExpiration { get; set; } = false;
 }

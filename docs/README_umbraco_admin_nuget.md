@@ -7,6 +7,7 @@ Provides a simple admin dashboard for seeing the current configuration for Moriy
 - 🔒 Shows the enabled/disabled state
 - 🌐 If enabled, shows the query string component for easy copy/paste
 - ⚙️ Display the current rules configuration as loaded by the website.
+- 🔄 Reflects live config reloads — the dashboard always shows the currently active configuration, even after an appsettings.json edit without a restart.
 
 ## Installation
 

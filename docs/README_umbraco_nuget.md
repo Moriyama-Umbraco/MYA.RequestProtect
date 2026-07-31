@@ -11,6 +11,7 @@ Seamlessly integrate request protection into your Umbraco website. This package 
 - 🎯 Pattern matching for Umbraco URLs and routes
 - 🍪 Automatic cookie-based authentication after validation
 - ⚙️ Easy configuration through appsettings.json
+- 🔄 Live config reload — appsettings.json changes take effect without restarting the site
 - 📝 Integration with Umbraco's logging
 
 ## Installation
