@@ -51,7 +51,17 @@ public sealed class RequestProtectMiddleware
         this.dateTimeProvider = dateTimeProvider;
         this.hostingEnvironment = hostingEnvironment;
         _compiled = Compile(config.CurrentValue);
-        config.OnChange(newOptions => _compiled = Compile(newOptions));
+        config.OnChange(newOptions =>
+        {
+            try
+            {
+                _compiled = Compile(newOptions);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to compile reloaded RequestProtect configuration; keeping previous configuration");
+            }
+        });
     }
 
     private static List<HeaderEntry> ParseHeaders(HeaderDetail[]? headers)
@@ -299,7 +309,9 @@ public sealed class RequestProtectMiddleware
 
     private bool AuthNotNeeded(HttpContext context)
     {
-        if (config.Rules.IpWhitelist is not null && config.Rules.IpWhitelist.Length > 0 && IsIpAllowed(ResolveClientIp(context)))
+        var snapshot = _compiled;
+
+        if (snapshot.Options.Rules.IpWhitelist is not null && snapshot.Options.Rules.IpWhitelist.Length > 0 && IsIpAllowed(snapshot.Whitelist, ResolveClientIp(context)))
         {
             return true;
         }
@@ -309,13 +321,13 @@ public sealed class RequestProtectMiddleware
             return true;
         }
 
-        bool hasRules = config.Rules.Rules is { Length: > 0 };
-        bool hasGroups = config.Rules.RuleGroups is { Length: > 0 };
+        bool hasRules = snapshot.Options.Rules.Rules is { Length: > 0 };
+        bool hasGroups = snapshot.Options.Rules.RuleGroups is { Length: > 0 };
 
         if (hasRules || hasGroups)
         {
             bool matched = EvaluateRulesAndGroups(
-                config.Rules.Rules, config.Rules.RuleGroups, config.Rules.RulesOperator, context.Request);
+                snapshot.Options.Rules.Rules, snapshot.Options.Rules.RuleGroups, snapshot.Options.Rules.RulesOperator, context.Request);
             return !matched; // If matched -> auth IS needed
         }
 
@@ -388,11 +400,10 @@ public sealed class RequestProtectMiddleware
         return false;
     }
 
-    private bool IsIpAllowed(IPAddress? remoteIp)
+    private bool IsIpAllowed(List<WhitelistEntry> whitelist, IPAddress? remoteIp)
     {
         if (remoteIp is null) return false;
 
-        var whitelist = _compiled.Whitelist;
         foreach (ref readonly var entry in CollectionsMarshal.AsSpan(whitelist))
         {
             logger.LogDebug("Checking IP whitelist entry: {ip} against remote IP: {remoteIp}", entry.Pattern, remoteIp);

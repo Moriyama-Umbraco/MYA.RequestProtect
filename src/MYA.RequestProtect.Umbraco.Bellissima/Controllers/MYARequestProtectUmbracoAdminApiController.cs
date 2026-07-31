@@ -14,12 +14,12 @@ namespace MYA.RequestProtect.Umbraco.Admin.Controllers
     [ApiExplorerSettings(GroupName = "MYA.RequestProtect.Umbraco.Admin")]
     public class MYARequestProtectUmbracoAdminApiController : MYARequestProtectUmbracoAdminApiControllerBase
     {
-        private RequestProtectOptions _config;
-        private IAuthorizationService _authorizationService;
+        private readonly IOptionsMonitor<RequestProtectOptions> _optionsMonitor;
+        private readonly IAuthorizationService _authorizationService;
 
-        public MYARequestProtectUmbracoAdminApiController(IOptions<RequestProtectOptions> options, IAuthorizationService authorizationService)
+        public MYARequestProtectUmbracoAdminApiController(IOptionsMonitor<RequestProtectOptions> optionsMonitor, IAuthorizationService authorizationService)
         {
-            _config = options.Value;
+            _optionsMonitor = optionsMonitor;
             _authorizationService = authorizationService;
         }
 
@@ -31,6 +31,8 @@ namespace MYA.RequestProtect.Umbraco.Admin.Controllers
         [ProducesResponseType<MyaRpEnabled>(StatusCodes.Status200OK)]
         public async Task<MyaRpEnabled> Enabled()
         {
+            var config = _optionsMonitor.CurrentValue;
+
             AuthorizationResult authorizationResult = await _authorizationService.AuthorizeResourceAsync(
             User,
             UserGroupPermissionResource.WithKeys(Guid.Parse(Constants.GroupGuid)),
@@ -38,8 +40,8 @@ namespace MYA.RequestProtect.Umbraco.Admin.Controllers
 
             var res = new MyaRpEnabled
             {
-                Enabled = _config.Enabled,
-                Code = authorizationResult.Succeeded && _config.Enabled ? $"{_config.QueryKey}={_config.Code}" : "---"
+                Enabled = config.Enabled,
+                Code = authorizationResult.Succeeded && config.Enabled ? $"{config.QueryKey}={config.Code}" : "---"
             };
 
             return res;
@@ -49,6 +51,8 @@ namespace MYA.RequestProtect.Umbraco.Admin.Controllers
         [ProducesResponseType<AuthRules>(StatusCodes.Status200OK)]
         public async Task<AuthRules?> GetProtectRules()
         {
+            var config = _optionsMonitor.CurrentValue;
+
             AuthorizationResult authorizationResult = await _authorizationService.AuthorizeResourceAsync(
             User,
             UserGroupPermissionResource.WithKeys(Guid.Parse(Constants.GroupGuid)),
@@ -59,7 +63,7 @@ namespace MYA.RequestProtect.Umbraco.Admin.Controllers
                 return null;
             }
 
-            return _config.Rules;
+            return config.Rules;
         }
 
         public class MyaRpEnabled
