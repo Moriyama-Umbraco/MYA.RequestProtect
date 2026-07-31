@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using MYA.RequestProtect.Options;
 using MYA.RequestProtect.Setup;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -25,6 +26,8 @@ internal static class Host
         string? webRootPath = null, string? remoteIp = null,
         string? forwardedHeaderName = null, string? forwardedHeaderValue = null)
     {
+        ReloadableConfigurationProvider? configProvider = null;
+
         var builder = new WebHostBuilder()
             .UseTestServer();
 
@@ -38,13 +41,10 @@ internal static class Host
             {
                 if (options is not null)
                 {
-                    var json = JsonSerializer.Serialize(new Dictionary<string, object?>
-                    {
-                        [RequestProtectOptions.Key] = options
-                    });
-
-                    var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
-                    config.AddJsonStream(stream);
+                    var source = new ReloadableConfigurationSource();
+                    source.Provider.Update(FlattenOptions(options));
+                    configProvider = source.Provider;
+                    config.Add(source);
                 }
             })
             .ConfigureLogging(logging =>
@@ -61,6 +61,10 @@ internal static class Host
             {
                 services.RemoveAll<IDatetimeProvider>();
                 services.AddSingleton<IDatetimeProvider, TestDatetimeProvider>();
+                if (configProvider is not null)
+                {
+                    services.AddSingleton(configProvider);
+                }
             })
             .Configure(app =>
             {
@@ -94,5 +98,17 @@ internal static class Host
         {
             BaseAddress = baseAddress ?? new Uri("https://localhost/")
         };
+    }
+
+    private static Dictionary<string, string?> FlattenOptions(RequestProtectOptions options)
+    {
+        var json = JsonSerializer.Serialize(new Dictionary<string, object?>
+        {
+            [RequestProtectOptions.Key] = options
+        });
+
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+        var flat = new ConfigurationBuilder().AddJsonStream(stream).Build();
+        return flat.AsEnumerable().ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
     }
 }
