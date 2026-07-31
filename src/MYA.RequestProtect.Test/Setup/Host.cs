@@ -42,7 +42,7 @@ internal static class Host
                 if (options is not null)
                 {
                     var source = new ReloadableConfigurationSource();
-                    source.Provider.Update(FlattenOptions(options));
+                    source.Provider.Update(FlattenOptionsForTest(options));
                     configProvider = source.Provider;
                     config.Add(source);
                 }
@@ -100,7 +100,7 @@ internal static class Host
         };
     }
 
-    private static Dictionary<string, string?> FlattenOptions(RequestProtectOptions options)
+    internal static Dictionary<string, string?> FlattenOptionsForTest(RequestProtectOptions options)
     {
         var json = JsonSerializer.Serialize(new Dictionary<string, object?>
         {
