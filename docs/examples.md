@@ -135,13 +135,14 @@ This example would redirect unauthorised requests to `https://example.com/unauth
       "Code": "My-Auth-Code",
       "Cookie": {
         "ExpiryMinutes": 60,
-        "PersistCookie": true
+        "PersistCookie": true,
+        "SlidingExpiration": true
       }
     }
   }
 }
 ```
-This example sets the authentication cookie to expire after 60 minutes. Set `PersistCookie` to `false` to create a session cookie that is deleted when the browser closes.
+This example sets the authentication cookie to expire after 60 minutes. Set `PersistCookie` to `false` to create a session cookie that is deleted when the browser closes. With `SlidingExpiration` set to `true`, the cookie's expiry resets on every request from an already-authenticated client, so an actively-browsing user is never logged out mid-session; this has no effect when `PersistCookie` is `false`, and note that it sets a `Set-Cookie` header on every authenticated response, which disables response/output/CDN caching for that traffic.
 
 ## Example 8: Hierarchical rule groups with All/Any operators
 ```json

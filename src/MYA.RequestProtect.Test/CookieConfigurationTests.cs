@@ -116,6 +116,7 @@ public class CookieConfigurationTests
         var options = BlockingOptions;
         options.Cookie.SlidingExpiration = true;
         options.Cookie.PersistCookie = true;
+        options.Cookie.ExpiryMinutes = 45;
 
         using var server = Host.CreateTestServer(logger, options);
         var client = server.CreateClient();
@@ -130,7 +131,9 @@ public class CookieConfigurationTests
         Assert.True(response.Headers.Contains("Set-Cookie"));
         var setCookie = response.Headers.GetValues("Set-Cookie").Single();
         Assert.Contains("MYAPA=somevalue", setCookie);
-        Assert.Contains("expires=", setCookie, StringComparison.OrdinalIgnoreCase);
+        // TestDatetimeProvider is fixed at 2025-06-10 12:00:00 UTC; ExpiryMinutes=45 pins the exact
+        // refreshed expiry, so a slide-refresh that ignores ExpiryMinutes (e.g. hardcodes a value) fails this.
+        Assert.Contains("expires=Tue, 10 Jun 2025 12:45:00 GMT", setCookie, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

@@ -65,7 +65,7 @@ app.UseMiddleware<RequestProtectMiddleware>();
 }
 ```
 
-With `SlidingExpiration: true`, an already-authenticated visitor's cookie expiry resets to `now + ExpiryMinutes` on every request, so an actively-browsing user is never logged out mid-session. Has no effect when `PersistCookie` is `false` (session cookies have no server-tracked expiry to extend).
+With `SlidingExpiration: true`, an already-authenticated visitor's cookie expiry resets to `now + ExpiryMinutes` on every request, so an actively-browsing user is never logged out mid-session. Has no effect when `PersistCookie` is `false` (session cookies have no server-tracked expiry to extend). Note: this sets a `Set-Cookie` header on every authenticated response, which prevents response/output caching and CDN caching for that traffic.
 
 ## Live Config Reload
 
