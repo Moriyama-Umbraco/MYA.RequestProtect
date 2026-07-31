@@ -500,3 +500,5 @@ $RECYCLE.BIN/
 # Verify files
 *.received.*
 /src/MYA.RequestProtect/appsettings-schema.MYA.RequestProtect.json
+
+.worktrees/
